@@ -29,12 +29,12 @@ func (s *Schema) AddMutation(key string, field *gql.Field) error {
 	return nil
 }
 
-func (s *Schema) Generate() (schema gql.Schema) {
-	schema, _ = gql.NewSchema(gql.SchemaConfig{
+func (s *Schema) Generate() *gql.Schema {
+	schema, _ := gql.NewSchema(gql.SchemaConfig{
 		Query:    genGQLObjectFromFields("Query", s.query),
 		Mutation: genGQLObjectFromFields("Mutation", s.mutation),
 	})
-	return
+	return &schema
 }
 
 func genGQLObjectFromFields(name string, fields gql.Fields) *gql.Object {
