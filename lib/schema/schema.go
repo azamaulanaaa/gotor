@@ -18,13 +18,13 @@ func New() *Schema {
 	}
 }
 
-func (s *Schema) AddQuery(key string, field *gql.Field) (err error) {
+func (s *Schema) AddQuery(key string, field *gql.Field) error {
 	if _, exist := s.query[key]; exist {
 		return errors.New("Query key already used")
 	}
 
 	s.query[key] = field
-	return
+	return nil
 }
 
 func (s *Schema) AddMutation(key string, field *gql.Field) error {
@@ -36,16 +36,15 @@ func (s *Schema) AddMutation(key string, field *gql.Field) error {
 	return nil
 }
 
-func (s *Schema) Generate() *gql.Schema {
-	schema, _ := gql.NewSchema(gql.SchemaConfig{
+func (s *Schema) Generate() (gql.Schema, error) {
+	return gql.NewSchema(gql.SchemaConfig{
 		Query:    genGQLObjectFromFields("Query", s.query),
 		Mutation: genGQLObjectFromFields("Mutation", s.mutation),
 	})
-	return &schema
 }
 
 func genGQLObjectFromFields(name string, fields gql.Fields) *gql.Object {
-	if len(fields) != 0 {
+	if len(fields) > 0 {
 		return gql.NewObject(gql.ObjectConfig{
 			Name:   name,
 			Fields: fields,
