@@ -42,22 +42,22 @@ type PieceBuffer struct {
 
 func (pb *PieceBuffer) WriteAt(p []byte, off int64) (n int, err error) {
 	n = len(p)
-	pb.replace(p, off)
+
+	p_len := int64(len(p))
+	new_buff := append(pb.buff[off:], p...)
+	new_buff = append(new_buff, pb.buff[off+p_len:]...)
+	pb.buff = new_buff
 	return
 }
 
 func (pb *PieceBuffer) ReadAt(p []byte, off int64) (n int, err error) {
 	n = len(p)
 	p = pb.buff[off : off+int64(n)]
-	pb.replace(make([]byte, n), off)
+	if pb.status.Complete {
+		pb.buff = make([]byte, len(pb.buff))
+		pb.MarkNotComplete()
+	}
 	return
-}
-
-func (pb *PieceBuffer) replace(p []byte, off int64) {
-	p_len := int64(len(p))
-	new_buff := append(pb.buff[off:], p...)
-	new_buff = append(new_buff, pb.buff[off+p_len:]...)
-	pb.buff = new_buff
 }
 
 func (pb *PieceBuffer) MarkComplete() (err error) {
