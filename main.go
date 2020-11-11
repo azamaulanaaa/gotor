@@ -1,11 +1,15 @@
 package main
 
 import (
+	"ohkaca/lib/storage"
+
 	"github.com/anacrolix/torrent"
 )
 
 func main() {
-	c, err := torrent.NewClient(nil)
+	customConfig := torrent.NewDefaultClientConfig()
+	customConfig.DefaultStorage = &storage.Storage{}
+	c, err := torrent.NewClient(customConfig)
 	must(err)
 	defer c.Close()
 }
