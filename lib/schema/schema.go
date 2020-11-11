@@ -11,6 +11,13 @@ type Schema struct {
 	mutation gql.Fields
 }
 
+func New() *Schema {
+	return &Schema{
+		query:    make(gql.Fields),
+		mutation: make(gql.Fields),
+	}
+}
+
 func (s *Schema) AddQuery(key string, field *gql.Field) (err error) {
 	if _, exist := s.query[key]; exist {
 		return errors.New("Query key already used")
