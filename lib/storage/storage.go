@@ -9,6 +9,12 @@ type Storage struct {
 	torrents map[string]*Torrent
 }
 
+func New() *Storage {
+	return &Storage{
+		torrents: make(map[string]*Torrent),
+	}
+}
+
 func (s *Storage) OpenTorrent(info *anacrolixMetainfo.Info, infohash anacrolixMetainfo.Hash) (anacrolixStorage.TorrentImpl, error) {
 	torrent := &Torrent{
 		pieces: make([]*PieceBuffer, info.NumPieces()),
