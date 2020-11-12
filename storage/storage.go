@@ -50,6 +50,10 @@ func (t *Torrent) Close() (err error) {
 	return
 }
 
+type PieceWait interface {
+	Wait()
+}
+
 type Piece struct {
 	mux        sync.RWMutex
 	file       *os.File
