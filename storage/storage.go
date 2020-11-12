@@ -56,6 +56,7 @@ type Piece struct {
 	filepath   string
 	active     int
 	completion anacrolixStorage.Completion
+	wg         sync.WaitGroup
 }
 
 func (pc *Piece) wakeup() (err error) {
@@ -126,13 +127,23 @@ func (pc *Piece) Close() (err error) {
 	return pc.file.Close()
 }
 
+func (pc *Piece) Wait() {
+	pc.wg.Wait()
+}
+
 func (pc *Piece) MarkComplete() (err error) {
+	if !pc.completion.Complete {
+		pc.wg.Done()
+	}
 	pc.completion.Complete = true
 	pc.completion.Ok = true
 	return
 }
 
 func (pc *Piece) MarkNotComplete() (err error) {
+	if pc.completion.Complete {
+		pc.wg.Add(1)
+	}
 	pc.completion.Complete = false
 	pc.completion.Ok = false
 	return
