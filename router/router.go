@@ -14,8 +14,9 @@ func New(client *anacrolixTorrent.Client) (http.Handler, error) {
   if err != nil {
     return nil, err
   }
-	router.Handle("/graphql", graphqlHandler)
 
+	router.Handle("/graphql", graphqlHandler)
 	router.HandleFunc("/{hash:[\\w\\d]+}/{filename}", newFileServe(client))
+  router.PathPrefix("/").Handler(http.FileServer(http.Dir("./router/html")))
   return router, nil
 }
