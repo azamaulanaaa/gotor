@@ -8,7 +8,7 @@ import (
 	anacrolixTorrent "github.com/anacrolix/torrent"
 )
 
-const host = "localhost:8000"
+const host = ":8000"
 
 func main() {
 	customConfig := anacrolixTorrent.NewDefaultClientConfig()
