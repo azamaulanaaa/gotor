@@ -1,6 +1,7 @@
 package main
 
 import (
+  "os"
 	"net/http"
 	"github.com/azamaulanaaa/ohkaca/storage"
   "github.com/azamaulanaaa/ohkaca/router"
@@ -8,7 +9,14 @@ import (
 	anacrolixTorrent "github.com/anacrolix/torrent"
 )
 
-const host = ":80"
+var host = ":8000"
+
+func init(){
+  envPort := os.Getenv("PORT")
+  if envPort != "" {
+    host = ":" + envPort
+  }
+}
 
 func main() {
 	customConfig := anacrolixTorrent.NewDefaultClientConfig()

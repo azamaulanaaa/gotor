@@ -8,6 +8,6 @@ WORKDIR /app
 
 RUN go build -o server
 
-EXPOSE 80
+EXPOSE 8000
 
 CMD ["/app/server"]
