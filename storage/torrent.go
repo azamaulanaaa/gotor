@@ -1,13 +1,15 @@
 package storage
 
 import (
+  "path/filepath"
+
 	anacrolixMetainfo "github.com/anacrolix/torrent/metainfo"
 	anacrolixStorage "github.com/anacrolix/torrent/storage"
 )
 
 type Torrent struct {
   completionDB []*anacrolixStorage.Completion
-  filename string
+  dirname string
 }
 
 func (t *Torrent) Piece(p anacrolixMetainfo.Piece) anacrolixStorage.PieceImpl {
@@ -20,9 +22,10 @@ func (t *Torrent) Piece(p anacrolixMetainfo.Piece) anacrolixStorage.PieceImpl {
     completion = t.completionDB[p.Index()]
   }
 
+  filename := filepath.Join(t.dirname, p.Hash().HexString())
 
   piece := &Piece{
-    filename : t.filename,
+    filename : filename,
     pieceInfo: p,
     completion: completion,
   }
