@@ -1,6 +1,7 @@
 package storage
 
 import (
+  "os"
   "path/filepath"
 
 	anacrolixMetainfo "github.com/anacrolix/torrent/metainfo"
@@ -33,5 +34,5 @@ func (t *Torrent) Piece(p anacrolixMetainfo.Piece) anacrolixStorage.PieceImpl {
 }
 
 func (t *Torrent) Close() (err error) {
-  return nil
+  return os.RemoveAll(t.dirname)
 }

@@ -43,5 +43,12 @@ func (pc *Piece) MarkNotComplete() (err error) {
 }
 
 func (pc *Piece) Completion() anacrolixStorage.Completion {
+  _, err := os.Stat(pc.filename)
+  if err == os.ErrNotExist {
+    pc.completion.Complete = false
+  } else if err != nil {
+    pc.completion.Ok = false
+  }
+
   return *pc.completion
 }

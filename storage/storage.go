@@ -3,16 +3,29 @@ package storage
 import (
   "path/filepath"
   "os"
+  "time"
 
 	anacrolixMetainfo "github.com/anacrolix/torrent/metainfo"
 	anacrolixStorage "github.com/anacrolix/torrent/storage"
 )
+
+const cleanUpInterval = 5 * time.Minute
 
 type Storage struct {
   baseDir string
 }
 
 func New(baseDir string) *Storage {
+  go func(){
+    for {
+      time.Sleep(cleanUpInterval)
+      err := Cleanup(baseDir, cleanUpInterval)
+      if err != nil {
+        panic(err)
+      }
+    }
+  }()
+
 	return &Storage{
       baseDir: baseDir,
 	}
@@ -24,9 +37,10 @@ func (s *Storage) OpenTorrent(info *anacrolixMetainfo.Info, infohash anacrolixMe
   if err != nil {
     return nil, err
   }
-
-	return &Torrent{
+  torrent := &Torrent{
     completionDB : make([]*anacrolixStorage.Completion, info.NumPieces()),
 	  dirname: dirname,
-	}, nil
+	}
+
+	return torrent, nil
 }
