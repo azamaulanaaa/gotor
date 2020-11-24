@@ -1,0 +1,13 @@
+{
+  "name": "ohkaca",
+  "description": "Cache torrent to an http",
+  "website": "https://github.com/azamaulanaaa/ohkaca",
+  "repository": "https://github.com/azamaulanaaa/ohkaca",
+  "stack": "container",
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "free"
+    }
+  }
+}
