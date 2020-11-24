@@ -2,8 +2,8 @@ package main
 
 import (
 	"net/http"
-	"ohkaca/storage"
-  "ohkaca/router"
+	"github.com/azamaulanaaa/ohkaca/storage"
+  "github.com/azamaulanaaa/ohkaca/router"
 
 	anacrolixTorrent "github.com/anacrolix/torrent"
 )

@@ -1,4 +1,4 @@
-module ohkaca
+module github.com/azamaulanaaa/ohkaca
 
 go 1.15
 

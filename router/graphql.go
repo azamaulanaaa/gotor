@@ -2,8 +2,8 @@ package router
 
 import (
   "net/http"
-  "ohkaca/router/resolver"
-  "ohkaca/router/schema"
+  "github.com/azamaulanaaa/ohkaca/router/resolver"
+  "github.com/azamaulanaaa/ohkaca/router/schema"
 
   gqlHandler "github.com/graphql-go/handler"
   anacrolixTorrent "github.com/anacrolix/torrent"
