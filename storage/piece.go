@@ -18,7 +18,7 @@ func (pc *Piece) WriteAt(p []byte, off int64) (n int, err error) {
     return 0 , err
   }
   defer file.Close()
-  n, err = file.WriteAt(p, pc.pieceInfo.Offset() + off)
+  n, err = file.WriteAt(p, off)
   return n, err
 }
 
@@ -28,7 +28,7 @@ func (pc *Piece) ReadAt(p []byte, off int64) (n int, err error) {
     return 0, err
   }
   defer file.Close()
-  n, err = file.ReadAt(p, pc.pieceInfo.Offset() + off)
+  n, err = file.ReadAt(p, off)
   return n, err
 }
 
