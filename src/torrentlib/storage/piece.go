@@ -66,9 +66,6 @@ func (piece Piece) WriteAt(b []byte, off int64) (n int, err error) {
 
 func (piece Piece) MarkComplete() error {
     piece.completion.Set(true)
-    if piece.completion.Get() != true {
-        os.Exit(1)
-    }
     return nil
 }
 
