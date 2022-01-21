@@ -4,8 +4,8 @@ go 1.17
 
 require (
 	github.com/anacrolix/log v0.10.0
-	github.com/anacrolix/missinggo/v2 v2.5.2
 	github.com/anacrolix/torrent v1.40.0
+	github.com/gorilla/mux v1.8.0
 	github.com/spf13/afero v1.8.0
 )
 
@@ -18,6 +18,7 @@ require (
 	github.com/anacrolix/go-libutp v1.1.0 // indirect
 	github.com/anacrolix/missinggo v1.3.0 // indirect
 	github.com/anacrolix/missinggo/perf v1.0.0 // indirect
+	github.com/anacrolix/missinggo/v2 v2.5.2 // indirect
 	github.com/anacrolix/mmsg v1.0.0 // indirect
 	github.com/anacrolix/multiless v0.2.0 // indirect
 	github.com/anacrolix/stm v0.3.0 // indirect
