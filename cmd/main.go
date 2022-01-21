@@ -4,8 +4,8 @@ import (
     "log"
 	"time"
 
-	"gotor/src/http"
-    "gotor/src/torrentlib"
+	"github.com/azamaulanaaa/gotor/src/http"
+    "github.com/azamaulanaaa/gotor/src/torrentlib"
 
     "github.com/spf13/afero"
 )

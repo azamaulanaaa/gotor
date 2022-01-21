@@ -6,7 +6,7 @@ import (
     "path/filepath"
     "time"
 
-    "gotor/src/torrentlib"
+    "github.com/azamaulanaaa/gotor/src/torrentlib"
 
     gorilla "github.com/gorilla/mux"
 )

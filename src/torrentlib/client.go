@@ -4,7 +4,7 @@ import (
     "errors"
     "time"
 
-    "gotor/src/torrentlib/storage"
+    "github.com/azamaulanaaa/gotor/src/torrentlib/storage"
     anacrolixLog "github.com/anacrolix/log"
     anacrolix "github.com/anacrolix/torrent"
     anacrolixMetainfo "github.com/anacrolix/torrent/metainfo"
