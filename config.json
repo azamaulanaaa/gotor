@@ -1,0 +1,10 @@
+{
+   "HttpServe": {
+      "Port": 8080,
+      "Timeout": 0
+   },
+   "TorrentClient": {
+      "PieceLifetime": 10,
+      "CleanUpPeaceInterval": 1
+   }
+}
