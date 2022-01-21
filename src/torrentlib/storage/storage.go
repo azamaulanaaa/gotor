@@ -1,50 +1,59 @@
 package storage
 
 import (
-	"os"
-	"sync"
+    "os"
+    "sync"
+    "time"
 
-	anacrolixMetainfo "github.com/anacrolix/torrent/metainfo"
-	anacrolixStorage "github.com/anacrolix/torrent/storage"
-	"github.com/spf13/afero"
+    anacrolixMetainfo "github.com/anacrolix/torrent/metainfo"
+    anacrolixStorage "github.com/anacrolix/torrent/storage"
+    "github.com/spf13/afero"
 )
 
 type Storage struct {
-    fileSystem afero.Fs
-	config StorageConfig
+    fileSystem      afero.Fs
+    config          StorageConfig
+    cleanUp         *CleanUp 
 }
 
 type StorageConfig struct {
+    Lifetime            time.Duration
+    CleanUpInterval     time.Duration
 }
 
 func NewStorage(fileSystem afero.Fs, config StorageConfig) anacrolixStorage.ClientImpl {
-	return &Storage{
+    storage := &Storage{
         fileSystem:     fileSystem,
-		config:         config,
-	}
+        config:         config,
+    }
+
+    if config.Lifetime != 0 && config.CleanUpInterval != 0 {
+        storage.cleanUp = NewCleanUp(fileSystem, config.Lifetime, config.CleanUpInterval)
+        storage.cleanUp.StartService()
+    }
+
+    return storage
 }
 
 func (storage Storage) OpenTorrent(info *anacrolixMetainfo.Info, infoHash anacrolixMetainfo.Hash) (anacrolixStorage.TorrentImpl, error) {
-    path := "./" + infoHash.HexString()
-    storage.fileSystem.MkdirAll(path, 0640)
-
-    fileSystem := afero.NewBasePathFs(storage.fileSystem, path)
-
-    database_file, err := fileSystem.OpenFile(
+    database_file, err := storage.fileSystem.OpenFile(
         infoHash.HexString() + ".db",
         os.O_CREATE | os.O_RDWR,
         0640,
     )
 
+    path := "./" + infoHash.HexString()
+    fileSystem := afero.NewBasePathFs(storage.fileSystem, path)
+
     if err != nil {
         return anacrolixStorage.TorrentImpl{}, err
     }
 
-	torrentImpl := TorrentImpl{
+    torrentImpl := TorrentImpl{
         fileSystem: fileSystem,
         database:   NewDatabase(database_file),
         locks:      make([]sync.RWMutex, info.NumPieces()),
 	}
 
-	return anacrolixStorage.TorrentImpl{Piece: torrentImpl.Piece, Close: torrentImpl.Close}, nil
+    return anacrolixStorage.TorrentImpl{Piece: torrentImpl.Piece, Close: torrentImpl.Close}, nil
 }

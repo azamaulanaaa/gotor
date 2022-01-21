@@ -5,8 +5,8 @@ import (
     "io"
     "os"
     "path/filepath"
-
     "sync"
+    "time"
 
     anacrolixMetainfo "github.com/anacrolix/torrent/metainfo"
     anacrolixStorage "github.com/anacrolix/torrent/storage"
@@ -21,9 +21,14 @@ type Piece struct {
 }
 
 func (piece Piece) WriteTo(w io.Writer) (n int64, err error) {
-	piece.lock.RLock()
+    piece.lock.RLock()
 	defer piece.lock.RUnlock()
 
+    if piece.Completion().Ok == false {
+        return 0, io.EOF
+    }
+
+    piece.updateModTime()
     fileInstance, err := piece.fileSystem.Open(piece.path())
     if err != nil {
         return
@@ -37,6 +42,11 @@ func (piece Piece) ReadAt(b []byte, off int64) (n int, err error) {
     piece.lock.RLock()
 	defer piece.lock.RUnlock()
 
+    if piece.Completion().Ok == false {
+        return 0, io.EOF
+    }
+
+    piece.updateModTime()
     fileInstance, err := piece.fileSystem.Open(piece.path())
     if err != nil {
         return 
@@ -47,9 +57,10 @@ func (piece Piece) ReadAt(b []byte, off int64) (n int, err error) {
 }
 
 func (piece Piece) WriteAt(b []byte, off int64) (n int, err error) {
-	piece.lock.RLock()
-    defer piece.lock.RUnlock()
+    piece.lock.Lock()
+    defer piece.lock.Unlock()
 
+    piece.updateModTime()
     fileInstance, err := piece.openToWrite()
     if err != nil {
         return
@@ -60,22 +71,29 @@ func (piece Piece) WriteAt(b []byte, off int64) (n int, err error) {
 }
 
 func (piece Piece) MarkComplete() error {
+    piece.updateModTime()
     piece.completion.Set(true)
     return nil
 }
 
 func (piece Piece) MarkNotComplete() error {
-	piece.lock.Lock()
-	defer piece.lock.Unlock()
+    piece.lock.Lock()
+    defer piece.lock.Unlock()
 
     piece.completion.Set(false)
     return piece.fileSystem.Remove(piece.path())
 }
 
 func (piece Piece) Completion() anacrolixStorage.Completion {
+    piece.lock.RLock()
+    defer piece.lock.RUnlock()
+
+    complete := piece.completion.Get()
+    exists, _ := afero.Exists(piece.fileSystem, piece.path());
+
     completion := anacrolixStorage.Completion{
-        Complete: piece.completion.Get(),
-		Ok:       true,
+        Complete:   complete && exists,
+        Ok:         !complete || exists,
 	}
     
     return completion
@@ -95,4 +113,10 @@ func (piece Piece) openToWrite() (afero.File, error) {
         os.O_CREATE | os.O_WRONLY,
         0640,
     )
+}
+
+func (piece Piece) updateModTime() {
+    if exists, _ := afero.Exists(piece.fileSystem, piece.path()); exists != true {
+        piece.fileSystem.Chtimes(piece.path(), time.Now(), time.Now())
+    }
 }
