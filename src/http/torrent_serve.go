@@ -50,6 +50,7 @@ func (torrentServe TorrentHttpHandler) ServeHTTP(rw http.ResponseWriter, r *http
     reader, err := torrentServe.Reader(hash, path)
     if err != nil {
         rw.WriteHeader(http.StatusNotFound)
+        return
     }
     defer reader.Close()
 
