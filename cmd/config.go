@@ -18,6 +18,8 @@ type HttpServeConfig struct {
 type TorrentClientConfig struct {
     PieceLifetime           uint32
     CleanUpPeaceInterval    uint32
+    MemoryStorage           bool
+    StorageDir              string
 }
 
 func DefaultConfig() Config {
@@ -29,6 +31,8 @@ func DefaultConfig() Config {
         TorrentClient: TorrentClientConfig{
             PieceLifetime:          10,
             CleanUpPeaceInterval:   1,
+            MemoryStorage:          false,
+            StorageDir:             "./cache",
         },
     }
 }

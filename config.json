@@ -5,6 +5,8 @@
    },
    "TorrentClient": {
       "PieceLifetime": 10,
-      "CleanUpPeaceInterval": 1
+      "CleanUpPeaceInterval": 1,
+      "StorageDir": "./cache",
+      "MemoryStorage": false,
    }
 }
