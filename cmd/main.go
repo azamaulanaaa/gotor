@@ -16,12 +16,16 @@ func main() {
     torrentClientConfig := torrentlib.DefaultClientConfig()
     torrentClientConfig.Lifetime = time.Duration(config.TorrentClient.PieceLifetime) * time.Second
     torrentClientConfig.ClenaUpInterval = time.Duration(config.TorrentClient.CleanUpPeaceInterval) * time.Second
-    torrentClientConfig.FileSystem = afero.NewBasePathFs(
-        afero.NewOsFs(),
-        config.TorrentClient.StorageDir,
-    )
-    if config.TorrentClient.MemoryStorage {
-        torrentClientConfig.FileSystem = afero.NewMemMapFs()
+
+    torrentClientConfig.FileSystem = afero.NewMemMapFs()
+    if config.TorrentClient.MemoryStorage == false {
+        fileSystem := afero.NewOsFs()
+        fileSystem.MkdirAll(config.TorrentClient.StorageDir, 0640)
+        torrentClientConfig.FileSystem = afero.NewBasePathFs(
+            fileSystem,
+            config.TorrentClient.StorageDir,
+        )
+        
     }
 
     client, err := torrentlib.NewClient(torrentClientConfig)
