@@ -10,12 +10,12 @@ import (
 	"github.com/azamaulanaaa/gotor/src/torrentlib"
 )
 
-type TorrentHttpHandler struct{
+type TorrentHandlerByPath struct{
     torrentClient *torrentlib.Client
 }
 
-func NewTorrentHttpHanndler(client *torrentlib.Client) http.Handler {
-    return TorrentHttpHandler{
+func NewTorrentHandlerByPath(client *torrentlib.Client) http.Handler {
+    return TorrentHandlerByPath{
         torrentClient: client,
     }
 }
@@ -23,13 +23,13 @@ func NewTorrentHttpHanndler(client *torrentlib.Client) http.Handler {
 /*
     Handle torrent file requiest with url path /[torrent hash]/[file path]
 */
-func (torrentServe TorrentHttpHandler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
+func (torrentHandlerByPath TorrentHandlerByPath) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
     urlPath := r.URL.Path
     hash := strings.Split(urlPath,"/")[1]
     path, _ := filepath.Rel("/" + hash, r.URL.Path)
     basename := filepath.Base(path)
 
-    torrent, err := torrentServe.torrentClient.AddHash(hash)
+    torrent, err := torrentHandlerByPath.torrentClient.AddHash(hash)
     if err != nil {
         rw.WriteHeader(http.StatusNotFound)
         return

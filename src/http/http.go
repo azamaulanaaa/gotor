@@ -1,29 +1,36 @@
 package http
 
 import (
-    "fmt"
-    "net/http"
+	"fmt"
+	"net/http"
 
-    "github.com/azamaulanaaa/gotor/src/torrentlib"
+	"github.com/azamaulanaaa/gotor/src/torrentlib"
+	gorilla "github.com/gorilla/mux"
 )
 
 type HttpServer struct {
     torrentClient   *torrentlib.Client
     port            uint16
-    httpHandler     http.Handler
+    router          http.Handler
 }
 
 func NewHttpServer(port uint16, torrentClient *torrentlib.Client) HttpServer {
-    httpServer := HttpServer {
+    router := gorilla.NewRouter()
+
+    serveByIndex := NewTorrentHandlerByIndex(torrentClient)
+    router.PathPrefix("/index/{\\w\\d}/").Handler(http.StripPrefix("/index", serveByIndex))
+
+    serveByPath := NewTorrentHandlerByPath(torrentClient)
+    router.PathPrefix("/{\\w\\d}/").Handler(serveByPath)
+
+    return HttpServer {
         torrentClient:  torrentClient,
         port:           port,
-        httpHandler:    NewTorrentHttpHanndler(torrentClient),
+        router:         router,
     }
-
-    return httpServer
 }
 
 func (httpServer HttpServer) ListenAndServe() error {
     host := fmt.Sprintf(":%d", httpServer.port)
-    return http.ListenAndServe(host, httpServer.httpHandler)
+    return http.ListenAndServe(host, httpServer.router)
 }
