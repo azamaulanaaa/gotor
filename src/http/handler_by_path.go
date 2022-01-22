@@ -1,13 +1,12 @@
 package http
 
 import (
-	"io"
 	"net/http"
-    "os"
 	"path/filepath"
 	"strings"
 	"time"
 
+	"github.com/azamaulanaaa/gotor/src/http/lib"
 	"github.com/azamaulanaaa/gotor/src/torrentlib"
 )
 
@@ -15,29 +14,10 @@ type TorrentHttpHandler struct{
     torrentClient *torrentlib.Client
 }
 
-func NewTorrentHttpHanndler(client *torrentlib.Client) TorrentHttpHandler {
+func NewTorrentHttpHanndler(client *torrentlib.Client) http.Handler {
     return TorrentHttpHandler{
         torrentClient: client,
     }
-}
-
-func (torrentServe TorrentHttpHandler) Reader(hash string, path string) (io.ReadSeekCloser, error) {
-    torrent, err := torrentServe.torrentClient.AddHash(hash)
-    if err != nil {
-        return nil, os.ErrNotExist
-    }
-
-    files := torrent.Files()
-    for _, file := range files {
-        if file.Path() != path {
-            continue
-        }
-        
-        reader := file.Reader()
-        return reader, nil
-    }
-    
-    return nil, os.ErrNotExist
 }
 
 /*
@@ -48,7 +28,14 @@ func (torrentServe TorrentHttpHandler) ServeHTTP(rw http.ResponseWriter, r *http
     hash := strings.Split(urlPath,"/")[1]
     path, _ := filepath.Rel("/" + hash, r.URL.Path)
     basename := filepath.Base(path)
-    reader, err := torrentServe.Reader(hash, path)
+
+    torrent, err := torrentServe.torrentClient.AddHash(hash)
+    if err != nil {
+        rw.WriteHeader(http.StatusNotFound)
+        return
+    }
+
+    reader, err := lib.TorrentReaderByPath(&torrent, path)
     if err != nil {
         rw.WriteHeader(http.StatusNotFound)
         return
