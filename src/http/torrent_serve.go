@@ -3,6 +3,7 @@ package http
 import (
 	"io"
 	"net/http"
+    "os"
 	"path/filepath"
 	"strings"
 	"time"
@@ -23,7 +24,7 @@ func NewTorrentHttpHanndler(client *torrentlib.Client) TorrentHttpHandler {
 func (torrentServe TorrentHttpHandler) Reader(hash string, path string) (io.ReadSeekCloser, error) {
     torrent, err := torrentServe.torrentClient.AddHash(hash)
     if err != nil {
-        return nil, io.ErrUnexpectedEOF
+        return nil, os.ErrNotExist
     }
 
     files := torrent.Files()
@@ -36,7 +37,7 @@ func (torrentServe TorrentHttpHandler) Reader(hash string, path string) (io.Read
         return reader, nil
     }
     
-    return nil, io.ErrUnexpectedEOF
+    return nil, os.ErrNotExist
 }
 
 /*
