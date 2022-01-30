@@ -1,9 +1,7 @@
 package tracker
 
 import (
-	"encoding/binary"
 	"errors"
-	"net"
 	"strings"
 
 	"github.com/marksamman/bencode"
@@ -35,13 +33,10 @@ func (response *Response) FromBencode(value string) error {
 
         numPeers := len(dataPeers) / 6
         for i := 0; i < numPeers; i++ {
-            ip := net.IPv4(dataPeers[i], dataPeers[i+1], dataPeers[+2], dataPeers[i+3])
-            port := binary.BigEndian.Uint16(dataPeers[i+4:i+6])
-
-            response.Peers = append(response.Peers, Peer{
-                IP: ip,
-                Port: port,
-            })
+            peer, err := NewPeerFromByte(dataPeers[i:i+6])
+            if err == nil {
+                response.Peers = append(response.Peers, peer) 
+            }
         }
     }
     delete(data, "peers")
