@@ -11,13 +11,13 @@ var (
 )
 
 type Peer interface {
-    PeerID() string
+    PeerID() [20]byte
     IP() net.IP
     Port() uint16
 }
 
 type peer_impl struct {
-    peerID  string
+    peerID  [20]byte
     ip      net.IP
     port    uint16
 }
@@ -35,7 +35,7 @@ func NewPeerFromByte(value []byte) (Peer, error) {
     }, nil
 }
 
-func (peer peer_impl) PeerID() string {
+func (peer peer_impl) PeerID() [20]byte {
     return peer.peerID
 }
 
