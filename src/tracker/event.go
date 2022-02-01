@@ -1,46 +1,11 @@
 package tracker
 
 import (
-	"errors"
+	"github.com/azamaulanaaa/gotor/src"
 )
 
 var (
-    ErrorEventUndefined = errors.New("event is not defined")
+    EventStarted src.Event = "started"
+    EventStopped src.Event = "stopped"
+    EventCompleted src.Event = "completed"
 )
-
-type Event interface {
-    String() string
-}
-
-type event_impl uint
-
-const (
-    EventStarted event_impl = iota
-    EventStopped
-    EventCompleted
-)
-
-var event_list = map[event_impl]string{
-    EventStarted: "started",
-    EventStopped: "stopped", 
-    EventCompleted: "completed",
-}
-
-func NewEvent(value string) (Event, error) {
-    for event, eventString := range event_list {
-        if value == eventString {
-            return event, nil
-        }
-    }
-
-    return nil, ErrorEventUndefined
-}
-
-func (event event_impl) String() string {
-    eventString, ok := event_list[event]
-    if ok {
-        return eventString
-    }
-
-    return ""
-}
