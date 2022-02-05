@@ -12,19 +12,19 @@ var (
     ErrorNotHexString = errors.New("value is not a hex string")
 )
 
-func ParseInfoHashHexString(value string) (src.InfoHash, error) {
+func ParseInfoHashHexString(value string) (src.Hash, error) {
     var err error
 
     hashByte, err := hex.DecodeString(value)
     if err != nil {
-        return src.InfoHash{}, ErrorNotHexString
+        return src.Hash{}, ErrorNotHexString
     }
 
     if len(hashByte) != 20 {
-        return src.InfoHash{}, ErrorLengthHash
+        return src.Hash{}, ErrorLengthHash
     }
 
-    var infoHash src.InfoHash
+    var infoHash src.Hash
     copy(infoHash[:], hashByte)
 
     return infoHash, nil
