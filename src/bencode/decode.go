@@ -35,9 +35,6 @@ func Decode(r io.Reader) (interface{}, error) {
         }
     }
 
-    data, _ = io.ReadAll(r)
-    fmt.Println(len(data.([]byte)))
-
     return nil, ErrorInvalid
 }
 
