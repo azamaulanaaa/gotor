@@ -10,13 +10,13 @@ type Peer struct {
     IP      net.IP
     Port    uint16
 }
-type InfoHash [20]byte
+type Hash [20]byte
 type Tracker interface {
     String() string
     Do(TrackerRequest) (TrackerResponse, error)
 }
 type TrackerRequest struct {
-    InfoHash        InfoHash
+    InfoHash        Hash
     PeerID          PeerID
     IP              net.IP
     Port            uint16      
@@ -32,3 +32,17 @@ type TrackerResponse struct {
     Other           map[string]interface{}
 }
 type Event string
+type Metainfo struct {
+    Announce    string
+    Info        Info
+}
+type Info struct {
+    PieceLength uint64
+    Pieces      []Hash
+    Length      uint64
+    Files       []File
+}
+type File struct {
+    Length  uint64
+    Path    string
+}
