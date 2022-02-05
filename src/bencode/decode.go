@@ -15,7 +15,7 @@ var (
     ErrorEOD = errors.New("bencode end of data")
 )
 
-func ParseBencode(r io.Reader) (interface{}, error) {
+func Decode(r io.Reader) (interface{}, error) {
     var err error
     var data interface{}
 
@@ -138,7 +138,7 @@ func parseBencodeList(r io.Reader) (interface{}, io.Reader, error) {
     newR.Discard(1)
     data := BencodeList{}
     for {
-        rawData, err := ParseBencode(newR) 
+        rawData, err := Decode(newR) 
         if err == ErrorEOD {
             return data, newR, nil
         }
@@ -166,7 +166,7 @@ func parseBencodeDictionary(r io.Reader) (interface{}, io.Reader, error) {
     newR.Discard(1)
     data := BencodeDictionary{}
     for {
-        key, err := ParseBencode(newR)
+        key, err := Decode(newR)
         if err == ErrorEOD {
             return data, newR, nil
         }
@@ -179,7 +179,7 @@ func parseBencodeDictionary(r io.Reader) (interface{}, io.Reader, error) {
             return nil, newR, ErrorInvalid
         }
 
-        value, err := ParseBencode(newR)
+        value, err := Decode(newR)
         if err == ErrorEOD {
             return nil, newR, ErrorInvalid
         }
