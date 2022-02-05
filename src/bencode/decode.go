@@ -71,7 +71,7 @@ func parseBencodeString(r io.Reader) (interface{}, io.Reader,  error) {
         return nil, newR, ErrorInvalid
     }
 
-    return BencodeString(data), newR, nil
+    return String(data), newR, nil
 }
 
 func parseBencodeInteger(r io.Reader) (interface{}, io.Reader, error) {
@@ -100,7 +100,7 @@ func parseBencodeInteger(r io.Reader) (interface{}, io.Reader, error) {
         return nil, newR, ErrorInvalid
     }
 
-    return BencodeInteger(data), newR, nil
+    return Integer(data), newR, nil
 }
 
 func parseBencodeEOD(r io.Reader) (interface{}, io.Reader, error) {
@@ -136,7 +136,7 @@ func parseBencodeList(r io.Reader) (interface{}, io.Reader, error) {
 
 
     newR.Discard(1)
-    data := BencodeList{}
+    data := List{}
     for {
         rawData, err := Decode(newR) 
         if err == ErrorEOD {
@@ -164,7 +164,7 @@ func parseBencodeDictionary(r io.Reader) (interface{}, io.Reader, error) {
     }
 
     newR.Discard(1)
-    data := BencodeDictionary{}
+    data := Dictionary{}
     for {
         key, err := Decode(newR)
         if err == ErrorEOD {
@@ -174,7 +174,7 @@ func parseBencodeDictionary(r io.Reader) (interface{}, io.Reader, error) {
             return nil, newR, err
         }
 
-        keyStr, ok := key.(BencodeString)
+        keyStr, ok := key.(String)
         if !ok {
             return nil, newR, ErrorInvalid
         }
