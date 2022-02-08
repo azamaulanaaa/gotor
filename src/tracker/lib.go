@@ -120,13 +120,14 @@ func decodeResponse(value string) (src.TrackerResponse, error) {
 
 func decodeBytePeer(value []byte) (src.Peer, error) {
     if len(value) != 6 {
-        return src.Peer{ }, ErrorPeerBytesInvalid
+        return nil, ErrorPeerBytesInvalid
     }
     ip := net.IPv4(value[0], value[1], value[2], value[3])
     port := binary.BigEndian.Uint16(value[4:6])
 
-    return src.Peer{
-        IP: ip,
-        Port: port,
-    }, nil
+    thePeer := NewPeer()
+    thePeer.SetIP(ip)
+    thePeer.SetPort(port)
+
+    return thePeer, nil
 }

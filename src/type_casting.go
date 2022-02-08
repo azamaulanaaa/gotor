@@ -5,10 +5,13 @@ import (
 )
 
 type PeerID [20]byte
-type Peer struct {
-    PeerID  PeerID
-    IP      net.IP
-    Port    uint16
+type Peer interface {
+    SetPeerID(peerid PeerID)
+    GetPeerID() (PeerID, bool)
+    SetIP(ip net.IP)
+    GetIP() (net.IP, bool)
+    SetPort(port uint16)
+    GetPort() (uint16, bool)
 }
 type Hash [20]byte
 type Tracker interface {
