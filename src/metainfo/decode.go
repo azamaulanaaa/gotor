@@ -63,6 +63,10 @@ func Decode(r io.Reader) (src.Metainfo, error) {
             info.Pieces = pieces
         }
 
+        if rawName, ok := rawInfo["name"].(bencode.String); ok {
+            info.Name = string(rawName)
+        }
+
         if rawLength, ok := rawInfo["length"].(bencode.Integer); ok {
             info.Length = uint64(rawLength)
         }

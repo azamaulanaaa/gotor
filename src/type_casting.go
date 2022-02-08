@@ -41,6 +41,7 @@ type Info struct {
     Pieces      []Hash
     Length      uint64
     Files       []File
+    Name        string
 }
 type File struct {
     Length  uint64
