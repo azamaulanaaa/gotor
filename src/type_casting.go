@@ -29,9 +29,9 @@ type TrackerResponse struct {
     FailureReason   string
     Interval        uint16
     Peers           []Peer
-    Other           map[string]interface{}
 }
 type Event string
+
 type Metainfo interface {
     Announce() string
     Info() Info

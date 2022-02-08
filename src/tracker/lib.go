@@ -10,12 +10,12 @@ import (
 	"strings"
 
 	"github.com/azamaulanaaa/gotor/src"
-	"github.com/marksamman/bencode"
+	"github.com/azamaulanaaa/gotor/src/bencode"
 )
 
 var (
     ErrorFailureReason = errors.New("error explained in failure reason field")
-    ErrorBencodeInvalid = errors.New("value is not a valid bencode")
+    ErrorInvalidResponse = errors.New("value is not a valid response")
     ErrorPeerBytesInvalid = errors.New("data byte of peer should be 6 bytes")
 )
 
@@ -50,35 +50,47 @@ func requestQuery(req src.TrackerRequest) string {
 func decodeResponse(value string) (src.TrackerResponse, error) {
     var err error
 
-    data, err := bencode.Decode(strings.NewReader(value))
-    if err != nil {
-        return src.TrackerResponse{}, ErrorBencodeInvalid
+    var rawResponse bencode.Dictionary
+    {
+        var rawData interface{}
+        rawData, err = bencode.Decode(strings.NewReader(value))
+        if err != nil {
+            return src.TrackerResponse{}, err
+        }
+
+        var ok bool
+        rawResponse, ok = rawData.(bencode.Dictionary)
+        if !ok {
+            return src.TrackerResponse{}, ErrorInvalidResponse
+        }
     }
+    
     var response src.TrackerResponse
 
-    if value, ok := data["failure reason"].(string); ok {
-        response.FailureReason = value
+    if rawFailureReason, ok := rawResponse["failure reason"].(bencode.String); ok {
+        response.FailureReason = string(rawFailureReason)
         return response, ErrorFailureReason
     }
 
-    response.Interval = uint16(data["interval"].(int64))
-    delete(data, "interval")
+    if rawInterval, ok := rawResponse["interval"].(bencode.Integer); ok {
+        response.Interval = uint16(rawInterval)
+    }
 
-    if dataPeersStr, ok := data["peers"].(string); ok {
-        dataPeers := []byte(dataPeersStr)
+    if rawPeers, ok := rawResponse["peers"].(bencode.String); ok {
+        peers := []src.Peer{}
+        rawPeersInByte := []byte(rawPeers)
 
-        numPeers := len(dataPeers) / 6
+        numPeers := len(rawPeersInByte) / 6
         for i := 0; i < numPeers; i++ {
-            peer, err := decodeBytePeer(dataPeers[i:i+6])
+            peer, err := decodeBytePeer(rawPeersInByte[i:i+6])
             if err == nil {
-                response.Peers = append(response.Peers, peer) 
+                peers = append(peers, peer) 
             }
         }
-    }
-    delete(data, "peers")
-    
-    response.Other = data
 
+        response.Peers = peers
+    }
+    
     return response, nil
 }
 
