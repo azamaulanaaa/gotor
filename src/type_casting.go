@@ -5,6 +5,9 @@ import (
 )
 
 type PeerID [20]byte
+type Hash [20]byte
+type Event string
+
 type Peer interface {
     SetPeerID(peerid PeerID)
     GetPeerID() (PeerID, bool)
@@ -13,7 +16,7 @@ type Peer interface {
     SetPort(port uint16)
     GetPort() (uint16, bool)
 }
-type Hash [20]byte
+
 type Tracker interface {
     String() string
     Do(TrackerRequest) (TrackerResponse, error)
@@ -41,21 +44,20 @@ type TrackerResponse struct {
     Interval        uint16
     Peers           []Peer
 }
-type Event string
 
 type Metainfo interface {
     Announce() string
-    Info() Info
+    Info() MetainfoInfo
 }
-type Info interface {
+type MetainfoInfo interface {
     PieceLength() uint64
     Pieces() []Hash
     Length() (uint64, bool)
-    Files() ([]File, bool)
+    Files() ([]MetainfoFile, bool)
     Name() (string, bool)
     Private() (bool, bool)
 }
-type File interface {
+type MetainfoFile interface {
     Length() uint64
     Path() string
 }

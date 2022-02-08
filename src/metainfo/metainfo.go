@@ -20,7 +20,7 @@ func (self metainfo) Announce() string {
     return ""
 }
 
-func (self metainfo) Info() src.Info {
+func (self metainfo) Info() src.MetainfoInfo {
     if rawInfo, ok := self["info"].(bencode.Dictionary); ok {
         return info(rawInfo)
     }
@@ -75,9 +75,9 @@ func (self info) Length() (uint64, bool) {
     return 0, false
 }
 
-func (self info) Files() ([]src.File, bool) {
+func (self info) Files() ([]src.MetainfoFile, bool) {
     if rawFiles, ok := self["files"].(bencode.List); ok {
-        files := make([]src.File, 0, len(rawFiles))
+        files := make([]src.MetainfoFile, 0, len(rawFiles))
 
         for _, v := range rawFiles {
             if rawFile, ok := v.(bencode.Dictionary); ok { 
