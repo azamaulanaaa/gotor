@@ -20,16 +20,40 @@ var (
 )
 
 func requestQuery(req src.TrackerRequest) string {
-    queryMap := map[string]string {
-        "info_hash": string(req.InfoHash[:]),
-        "peer_id": string(req.PeerID[:]),
-        "ip": req.IP.String(),
-        "port": strconv.FormatUint(uint64(req.Port), 10),
-        "uploaded": strconv.FormatUint(req.Uploaded, 10),
-        "downloaded": strconv.FormatUint(req.Downloaded, 10),
-        "left": strconv.FormatUint(req.Left, 10),
-        "event": string(req.Event),
+    queryMap := map[string]string{}
+
+    if rawInfoHash, ok := req.GetInfoHash(); ok {
+        queryMap["info_hash"] = string(rawInfoHash[:]) 
     }
+
+    if rawPeerID, ok := req.GetPeerID(); ok {
+        queryMap["peer_id"] = string(rawPeerID[:])
+    }
+
+    if rawIP, ok := req.GetIP(); ok {
+        queryMap["ip"] = rawIP.String()
+    }
+
+    if rawPort, ok := req.GetPort(); ok {
+        queryMap["port"] = strconv.FormatUint(uint64(rawPort), 10)
+    }
+
+    if rawUploaded, ok := req.GetUploaded(); ok {
+        queryMap["uploaded"] = strconv.FormatUint(rawUploaded, 10)
+    }
+
+    if rawDownloaded, ok := req.GetDownloaded(); ok {
+        queryMap["downloaded"] = strconv.FormatUint(rawDownloaded, 10)
+    }
+
+    if rawLeft, ok := req.GetLeft(); ok {
+        queryMap["left"] = strconv.FormatUint(rawLeft, 10)
+    }
+
+    if rawEvent, ok := req.GetEvent(); ok {
+        queryMap["event"] = string(rawEvent)
+    }
+
     queryStr := ""
     for key, value := range queryMap {
         junction := ""
