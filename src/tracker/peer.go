@@ -13,8 +13,7 @@ type peer struct {
 }
 
 func NewPeer() src.Peer {
-    thePeer := peer{}
-    return &thePeer
+    return &peer{}
 }
 
 func (self *peer) SetPeerID(peerid src.PeerID){

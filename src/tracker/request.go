@@ -18,9 +18,7 @@ type request struct {
 }
 
 func NewRequest() src.TrackerRequest {
-    req := request{}
-
-    return &req
+    return &request{}
 }
 
 func (req *request) SetInfoHash(hash src.Hash) {
