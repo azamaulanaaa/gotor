@@ -61,3 +61,9 @@ type MetainfoFile interface {
     Length() uint64
     Path() string
 }
+
+type Bitfield interface {
+    Set(index uint64, value bool) error
+    Get(index uint64) (bool, error)
+    Length() uint64
+}
