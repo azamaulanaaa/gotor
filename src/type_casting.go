@@ -32,18 +32,19 @@ type TrackerResponse struct {
     Other           map[string]interface{}
 }
 type Event string
-type Metainfo struct {
-    Announce    string
-    Info        Info
+type Metainfo interface {
+    Announce() string
+    Info() Info
 }
-type Info struct {
-    PieceLength uint64
-    Pieces      []Hash
-    Length      uint64
-    Files       []File
-    Name        string
+type Info interface {
+    PieceLength() uint64
+    Pieces() []Hash
+    Length() (uint64, bool)
+    Files() ([]File, bool)
+    Name() (string, bool)
+    Private() (bool, bool)
 }
-type File struct {
-    Length  uint64
-    Path    string
+type File interface {
+    Length() uint64
+    Path() string
 }
