@@ -55,3 +55,7 @@ func (self bitfield) Get(index uint64) (bool, error) {
 func (self bitfield) Length() uint64 {
     return uint64(len(self) * 8)
 }
+
+func (self bitfield) AsBytes() []byte {
+    return []byte(self)
+}

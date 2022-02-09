@@ -66,4 +66,5 @@ type Bitfield interface {
     Set(index uint64, value bool) error
     Get(index uint64) (bool, error)
     Length() uint64
+    AsBytes() []byte
 }
