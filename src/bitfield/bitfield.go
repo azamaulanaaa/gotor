@@ -12,7 +12,7 @@ var (
 
 type bitfield []byte
 
-func NewBitfield(length uint64) src.Bitfield {
+func NewBitfield(length uint32) src.Bitfield {
     return make(bitfield, 0, length / 8)
 }
 
@@ -20,7 +20,7 @@ func BitFieldFormBytes(b []byte) src.Bitfield {
     return bitfield(b)
 }
 
-func (self bitfield) Set(index uint64, value bool) error {
+func (self bitfield) Set(index uint32, value bool) error {
     if index >= self.Length() {
         return ErrorOutOfIndex
     }
@@ -40,7 +40,7 @@ func (self bitfield) Set(index uint64, value bool) error {
     return nil
 }
 
-func (self bitfield) Get(index uint64) (bool, error) {
+func (self bitfield) Get(index uint32) (bool, error) {
     if index >= self.Length() {
         return false, ErrorOutOfIndex
     }
@@ -52,8 +52,8 @@ func (self bitfield) Get(index uint64) (bool, error) {
     return bit == 1, nil
 }
 
-func (self bitfield) Length() uint64 {
-    return uint64(len(self) * 8)
+func (self bitfield) Length() uint32 {
+    return uint32(len(self) * 8)
 }
 
 func (self bitfield) AsBytes() []byte {

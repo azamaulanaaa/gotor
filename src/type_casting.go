@@ -50,7 +50,7 @@ type Metainfo interface {
     Info() MetainfoInfo
 }
 type MetainfoInfo interface {
-    PieceLength() uint64
+    PieceLength() uint32
     Pieces() []Hash
     Length() (uint64, bool)
     Files() ([]MetainfoFile, bool)
@@ -63,8 +63,8 @@ type MetainfoFile interface {
 }
 
 type Bitfield interface {
-    Set(index uint64, value bool) error
-    Get(index uint64) (bool, error)
-    Length() uint64
+    Set(index uint32, value bool) error
+    Get(index uint32) (bool, error)
+    Length() uint32
     AsBytes() []byte
 }
