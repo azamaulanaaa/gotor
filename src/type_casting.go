@@ -9,12 +9,9 @@ type Hash [20]byte
 type Event string
 
 type Peer interface {
-    SetPeerID(peerid PeerID)
     GetPeerID() (PeerID, bool)
-    SetIP(ip net.IP)
-    GetIP() (net.IP, bool)
-    SetPort(port uint16)
-    GetPort() (uint16, bool)
+    GetIP() net.IP
+    GetPort() uint16
 }
 
 type Tracker interface {

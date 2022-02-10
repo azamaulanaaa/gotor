@@ -7,18 +7,15 @@ import (
 )
 
 type peer struct {
-    peerid interface{}
-    ip interface{}
-    port interface{}
+    peerid  interface{}
+    ip      net.IP
+    port    uint16
 }
 
 func NewPeer() src.Peer {
     return &peer{}
 }
 
-func (self *peer) SetPeerID(peerid src.PeerID){
-    self.peerid = peerid
-}
 func (self *peer) GetPeerID() (src.PeerID, bool) {
     if peerid, ok := self.peerid.(src.PeerID); ok {
         return peerid, true
@@ -27,25 +24,11 @@ func (self *peer) GetPeerID() (src.PeerID, bool) {
     return src.PeerID{}, false
 }
 
-func (self *peer) SetIP(ip net.IP) {
-    self.ip = ip
-}
-func (self *peer) GetIP() (net.IP, bool) {
-    if ip, ok := self.ip.(net.IP); ok {
-        return ip, true
-    }
-
-    return nil, false
+func (self *peer) GetIP() net.IP {
+    return self.ip
 }
 
-func (self *peer) SetPort(port uint16) {
-    self.port = port
-}
-func (self *peer) GetPort() (uint16, bool) {
-    if port, ok := self.port.(uint16); ok {
-        return port, true
-    }
-
-    return 0, false
+func (self *peer) GetPort() uint16 {
+    return self.port
 }
 

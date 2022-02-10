@@ -125,9 +125,10 @@ func decodeBytePeer(value []byte) (src.Peer, error) {
     ip := net.IPv4(value[0], value[1], value[2], value[3])
     port := binary.BigEndian.Uint16(value[4:6])
 
-    thePeer := NewPeer()
-    thePeer.SetIP(ip)
-    thePeer.SetPort(port)
+    peer := peer{
+        ip: ip,
+        port: port,
+    }
 
-    return thePeer, nil
+    return &peer, nil
 }
