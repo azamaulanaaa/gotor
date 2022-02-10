@@ -7,6 +7,8 @@ import (
 type PeerID     [20]byte
 type Hash       [20]byte
 type Event      string
+type Reserved   [8]byte
+type MessageID  byte
 
 type Peer interface {
     PeerID()    (PeerID, bool)
@@ -55,4 +57,16 @@ type Bitfield interface {
     Get(index uint32)               (bool, error)
     Length()                        uint32
     AsBytes()                       []byte
+}
+
+type Handshake struct {
+    Protocol    []byte
+    Reserved    Reserved
+    InfoHash    Hash
+    PeerID      PeerID
+}
+
+type Message struct {
+    MessageID   MessageID
+    Payload     []byte
 }
