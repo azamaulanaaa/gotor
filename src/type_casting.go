@@ -4,9 +4,9 @@ import (
     "net"
 )
 
-type PeerID [20]byte
-type Hash [20]byte
-type Event string
+type PeerID     [20]byte
+type Hash       [20]byte
+type Event      string
 
 type Peer interface {
     PeerID()    (PeerID, bool)
@@ -15,8 +15,8 @@ type Peer interface {
 }
 
 type Tracker interface {
-    String() string
-    Do(TrackerRequest) (TrackerResponse, error)
+    String()            string
+    Do(TrackerRequest)  (TrackerResponse, error)
 }
 type TrackerRequest interface {
     InfoHash()      Hash
@@ -35,16 +35,16 @@ type TrackerResponse struct {
 }
 
 type Metainfo interface {
-    Announce() string
-    Info() MetainfoInfo
+    Announce()      string
+    Info()          MetainfoInfo
 }
 type MetainfoInfo interface {
-    PieceLength() uint32
-    Pieces() []Hash
-    Length() (uint64, bool)
-    Files() ([]MetainfoFile, bool)
-    Name() (string, bool)
-    Private() (bool, bool)
+    PieceLength()   uint32
+    Pieces()        []Hash
+    Length()        (uint64, bool)
+    Files()         ([]MetainfoFile, bool)
+    Name()          (string, bool)
+    Private()       (bool, bool)
 }
 type MetainfoFile interface {
     Length() uint64
@@ -52,8 +52,8 @@ type MetainfoFile interface {
 }
 
 type Bitfield interface {
-    Set(index uint32, value bool) error
-    Get(index uint32) (bool, error)
-    Length() uint32
-    AsBytes() []byte
+    Set(index uint32, value bool)   error
+    Get(index uint32)               (bool, error)
+    Length()                        uint32
+    AsBytes()                       []byte
 }
