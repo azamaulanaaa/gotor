@@ -36,9 +36,9 @@ func (self info) Name() (string, bool) {
     return "", false
 }
 
-func (self info) PieceLength() uint32 {
+func (self info) PieceLength() uint64 {
     if rawPieceLength, ok := self["piece length"].(bencode.Integer); ok {
-        return uint32(rawPieceLength)
+        return uint64(rawPieceLength)
     }
 
     return 0
