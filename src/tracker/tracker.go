@@ -76,7 +76,7 @@ func (tracker tracker_impl) Do(request src.TrackerRequest) (src.TrackerResponse,
     case ProtocolUDP:
         return tracker.doUDP(request)
     default:
-        return src.TrackerResponse{}, ErrorProtocolUndefined
+        return nil, ErrorProtocolUndefined
     }
 }
 
@@ -89,14 +89,14 @@ func (tracker tracker_impl) doHTTP(request src.TrackerRequest) (src.TrackerRespo
         nil,
     )
     if err != nil {
-        return src.TrackerResponse{}, err
+        return nil, err
     }
 
     httpReq.URL.RawQuery = requestQuery(request)
 
     httpRes, err := tracker.httpClient.Do(httpReq)
     if err != nil {
-        return src.TrackerResponse{}, err
+        return nil, err
     }
     defer httpRes.Body.Close()
 
@@ -106,10 +106,10 @@ func (tracker tracker_impl) doHTTP(request src.TrackerRequest) (src.TrackerRespo
 }
 
 func (tracker tracker_impl) doHTTPS(request src.TrackerRequest) (src.TrackerResponse, error) {
-    return src.TrackerResponse{ }, ErrorProtocolNotSuppported
+    return nil, ErrorProtocolNotSuppported
 }
 
 func (tracker tracker_impl) doUDP(request src.TrackerRequest) (src.TrackerResponse, error) {
-    return src.TrackerResponse{ }, ErrorProtocolNotSuppported
+    return nil, ErrorProtocolNotSuppported
 }
 

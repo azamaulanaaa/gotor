@@ -28,10 +28,9 @@ type TrackerRequest interface {
     Left()          uint64
     Event()         (Event, bool)
 }
-type TrackerResponse struct {
-    FailureReason   string
-    Interval        uint16
-    Peers           []Peer
+type TrackerResponse interface {
+    Interval()      uint16
+    Peers()         []Peer
 }
 
 type Metainfo interface {

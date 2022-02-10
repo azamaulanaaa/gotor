@@ -14,7 +14,6 @@ import (
 )
 
 var (
-    ErrorFailureReason = errors.New("error explained in failure reason field")
     ErrorInvalidResponse = errors.New("value is not a valid response")
     ErrorPeerBytesInvalid = errors.New("data byte of peer should be 6 bytes")
 )
@@ -73,25 +72,24 @@ func decodeResponse(value string) (src.TrackerResponse, error) {
         var rawData interface{}
         rawData, err = bencode.Decode(strings.NewReader(value))
         if err != nil {
-            return src.TrackerResponse{}, err
+           return nil, err
         }
 
         var ok bool
         rawResponse, ok = rawData.(bencode.Dictionary)
         if !ok {
-            return src.TrackerResponse{}, ErrorInvalidResponse
+            return nil, ErrorInvalidResponse
         }
     }
     
-    var response src.TrackerResponse
+    var res response
 
     if rawFailureReason, ok := rawResponse["failure reason"].(bencode.String); ok {
-        response.FailureReason = string(rawFailureReason)
-        return response, ErrorFailureReason
+        return nil, errors.New(string(rawFailureReason))
     }
 
     if rawInterval, ok := rawResponse["interval"].(bencode.Integer); ok {
-        response.Interval = uint16(rawInterval)
+        res.interval = uint16(rawInterval)
     }
 
     if rawPeers, ok := rawResponse["peers"].(bencode.String); ok {
@@ -106,10 +104,10 @@ func decodeResponse(value string) (src.TrackerResponse, error) {
             }
         }
 
-        response.Peers = peers
+        res.peers = peers
     }
     
-    return response, nil
+    return &res, nil
 }
 
 func decodeBytePeer(value []byte) (src.Peer, error) {
