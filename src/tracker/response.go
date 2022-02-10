@@ -1,13 +1,17 @@
 package tracker
 
-import "github.com/azamaulanaaa/gotor/src"
+import (
+	"time"
+
+	"github.com/azamaulanaaa/gotor/src"
+)
 
 type response struct {
-    interval    uint16
+    interval    time.Duration
     peers       []src.Peer
 }
 
-func (res *response) Interval() uint16 {
+func (res *response) Interval() time.Duration {
     return res.interval
 }
 

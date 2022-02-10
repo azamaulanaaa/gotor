@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/azamaulanaaa/gotor/src"
 	"github.com/azamaulanaaa/gotor/src/bencode"
@@ -89,7 +90,7 @@ func decodeResponse(value string) (src.TrackerResponse, error) {
     }
 
     if rawInterval, ok := rawResponse["interval"].(bencode.Integer); ok {
-        res.interval = uint16(rawInterval)
+        res.interval = time.Duration(rawInterval) * time.Millisecond
     }
 
     if rawPeers, ok := rawResponse["peers"].(bencode.String); ok {

@@ -1,7 +1,8 @@
 package src
 
 import (
-    "net"
+	"net"
+	"time"
 )
 
 type PeerID     [20]byte
@@ -31,7 +32,7 @@ type TrackerRequest interface {
     Event()         (Event, bool)
 }
 type TrackerResponse interface {
-    Interval()      uint16
+    Interval()      time.Duration
     Peers()         []Peer
 }
 
