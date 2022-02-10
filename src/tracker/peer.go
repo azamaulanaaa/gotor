@@ -16,7 +16,7 @@ func NewPeer() src.Peer {
     return &peer{}
 }
 
-func (self *peer) GetPeerID() (src.PeerID, bool) {
+func (self *peer) PeerID() (src.PeerID, bool) {
     if peerid, ok := self.peerid.(src.PeerID); ok {
         return peerid, true
     }
@@ -24,11 +24,11 @@ func (self *peer) GetPeerID() (src.PeerID, bool) {
     return src.PeerID{}, false
 }
 
-func (self *peer) GetIP() net.IP {
+func (self *peer) IP() net.IP {
     return self.ip
 }
 
-func (self *peer) GetPort() uint16 {
+func (self *peer) Port() uint16 {
     return self.port
 }
 

@@ -22,35 +22,35 @@ var (
 func requestQuery(req src.TrackerRequest) string {
     queryMap := map[string]string{}
 
-    if rawInfoHash, ok := req.GetInfoHash(); ok {
+    if rawInfoHash, ok := req.InfoHash(); ok {
         queryMap["info_hash"] = string(rawInfoHash[:]) 
     }
 
-    if rawPeerID, ok := req.GetPeerID(); ok {
+    if rawPeerID, ok := req.PeerID(); ok {
         queryMap["peer_id"] = string(rawPeerID[:])
     }
 
-    if rawIP, ok := req.GetIP(); ok {
+    if rawIP, ok := req.IP(); ok {
         queryMap["ip"] = rawIP.String()
     }
 
-    if rawPort, ok := req.GetPort(); ok {
+    if rawPort, ok := req.Port(); ok {
         queryMap["port"] = strconv.FormatUint(uint64(rawPort), 10)
     }
 
-    if rawUploaded, ok := req.GetUploaded(); ok {
+    if rawUploaded, ok := req.Uploaded(); ok {
         queryMap["uploaded"] = strconv.FormatUint(rawUploaded, 10)
     }
 
-    if rawDownloaded, ok := req.GetDownloaded(); ok {
+    if rawDownloaded, ok := req.Downloaded(); ok {
         queryMap["downloaded"] = strconv.FormatUint(rawDownloaded, 10)
     }
 
-    if rawLeft, ok := req.GetLeft(); ok {
+    if rawLeft, ok := req.Left(); ok {
         queryMap["left"] = strconv.FormatUint(rawLeft, 10)
     }
 
-    if rawEvent, ok := req.GetEvent(); ok {
+    if rawEvent, ok := req.Event(); ok {
         queryMap["event"] = string(rawEvent)
     }
 

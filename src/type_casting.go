@@ -9,9 +9,9 @@ type Hash [20]byte
 type Event string
 
 type Peer interface {
-    GetPeerID() (PeerID, bool)
-    GetIP() net.IP
-    GetPort() uint16
+    PeerID()    (PeerID, bool)
+    IP()        net.IP
+    Port()      uint16
 }
 
 type Tracker interface {
@@ -19,22 +19,14 @@ type Tracker interface {
     Do(TrackerRequest) (TrackerResponse, error)
 }
 type TrackerRequest interface {
-    SetInfoHash(hash Hash)
-    GetInfoHash() (Hash, bool)
-    SetPeerID(peerID PeerID)
-    GetPeerID() (PeerID, bool)
-    SetIP(ip net.IP)
-    GetIP() (net.IP, bool)
-    SetPort(port uint16)
-    GetPort() (uint16, bool)
-    SetUploaded(uploaded uint64)
-    GetUploaded() (uint64, bool)
-    SetDownloaded(downloaded uint64)
-    GetDownloaded() (uint64, bool)
-    SetLeft(left uint64)
-    GetLeft() (uint64, bool)
-    SetEvent(event Event)
-    GetEvent() (Event, bool)
+    InfoHash()      Hash
+    PeerID()        PeerID
+    IP()            (net.IP, bool)
+    Port()          (uint16, bool)
+    Uploaded()      uint64
+    Downloaded()    uint64
+    Left()          uint64
+    Event()         (Event, bool)
 }
 type TrackerResponse struct {
     FailureReason   string
