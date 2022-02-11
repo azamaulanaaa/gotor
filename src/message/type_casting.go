@@ -1,4 +1,4 @@
-package messagehandler
+package message
 
 import (
 	"errors"
@@ -7,12 +7,6 @@ import (
 	"github.com/azamaulanaaa/gotor/src/hash"
 	"github.com/azamaulanaaa/gotor/src/peer"
 )
-
-type MessageHandler interface {
-    SendHandshake(handshake Handshake)  error
-    SendMessage(message interface{})    error
-    Close()                             error
-}
 
 type Reserved [8]byte
 
@@ -39,27 +33,27 @@ const (
     messageCancel
 )
 
-type MessageChoke struct {}
-type MessageUnChoke struct {}
-type MessageInterested struct {}
-type MessageNotInterested struct {}
-type MessageHave struct {
+type Choke struct {}
+type UnChoke struct {}
+type Interested struct {}
+type NotInterested struct {}
+type Have struct {
     Index   uint32
 }
-type MessageBitfield struct{
+type Bitfield struct{
     Bitfield bitfield.Bitfield
 }
-type MessageRequest struct {
+type Reqeust struct {
     Index   uint32
     Begin   uint32
     Length  uint32
 }
-type MessagePiece struct {
+type Piece struct {
     Index   uint32
     Begin   uint32
     Piece   []byte
 }
-type MessageCancel struct {
+type Cancel struct {
     Index   uint32
     Begin   uint32
     Length  uint32

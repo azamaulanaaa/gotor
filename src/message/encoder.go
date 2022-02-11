@@ -1,35 +1,35 @@
-package messagehandler
+package message
 
 import "github.com/azamaulanaaa/gotor/src/big_endian"
 
-func encodeMessage(rawMessage interface{}) ([]byte, error) {
+func EncodeMessage(rawMessage interface{}) ([]byte, error) {
     switch message := rawMessage.(type) {
     case KeepAlive:
         return encodeKeepAlive()
-    case MessageChoke:
+    case Choke:
         return encodeChoke(message)
-    case MessageUnChoke:
+    case UnChoke:
         return encodeUnChoke(message)
-    case MessageInterested:
+    case Interested:
         return encodeInterested(message)
-    case MessageNotInterested:
+    case NotInterested:
         return encodeNotInterested(message)
-    case MessageHave:
+    case Have:
         return encodeHave(message)
-    case MessageBitfield:
+    case Bitfield:
         return encodeBitfield(message)
-    case MessageRequest:
+    case Reqeust:
         return encodeRequest(message)
-    case MessagePiece:
+    case Piece:
         return encodePiece(message)
-    case MessageCancel:
+    case Cancel:
         return encodeCancel(message)
     default:
         return nil, ErrorMessageInvalid
     }
 }
 
-func encodeHandshake(handshake Handshake) ([]byte, error) {
+func EncodeHandshake(handshake Handshake) ([]byte, error) {
     var err error
 
     encodedProtocolLength, err := bigendian.Encode(uint8(len(handshake.Protocol)))
@@ -78,23 +78,23 @@ func finisher(id messageID, data []byte) ([]byte, error) {
     return rawData, nil
 }
 
-func encodeChoke(message MessageChoke) ([]byte, error) {
+func encodeChoke(message Choke) ([]byte, error) {
     return finisher(messageChoke, nil)
 }
 
-func encodeUnChoke(message MessageUnChoke) ([]byte, error) {
+func encodeUnChoke(message UnChoke) ([]byte, error) {
     return finisher(messageChoke, nil)
 }
 
-func encodeInterested(message MessageInterested) ([]byte, error) {
+func encodeInterested(message Interested) ([]byte, error) {
     return finisher(messageInterested, nil)
 }
 
-func encodeNotInterested(message MessageNotInterested) ([]byte, error) {
+func encodeNotInterested(message NotInterested) ([]byte, error) {
     return finisher(messageNotInterested, nil)
 }
 
-func encodeHave(message MessageHave) ([]byte, error) {
+func encodeHave(message Have) ([]byte, error) {
     var err error
 
     data := make([]byte, 0, 4)
@@ -106,13 +106,13 @@ func encodeHave(message MessageHave) ([]byte, error) {
     return finisher(messageHave, data)
 }
 
-func encodeBitfield(message MessageBitfield) ([]byte, error) {
+func encodeBitfield(message Bitfield) ([]byte, error) {
     data := message.Bitfield.AsBytes()
 
     return finisher(messageBitfield, data)
 }
 
-func encodeRequest(message MessageRequest) ([]byte, error) {
+func encodeRequest(message Reqeust) ([]byte, error) {
     var err error
 
     if message.Length > MaxLength {
@@ -146,7 +146,7 @@ func encodeRequest(message MessageRequest) ([]byte, error) {
     return finisher(messageRequest, data)
 }
 
-func encodePiece(message MessagePiece) ([]byte, error) {
+func encodePiece(message Piece) ([]byte, error) {
     var err error
 
     if len(message.Piece) > int(MaxLength) {
@@ -175,7 +175,7 @@ func encodePiece(message MessagePiece) ([]byte, error) {
     return finisher(messagePiece, data)
 }
 
-func encodeCancel(message MessageCancel) ([]byte, error) {
+func encodeCancel(message Cancel) ([]byte, error) {
     var err error
 
     if message.Length > MaxLength {

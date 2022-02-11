@@ -1,4 +1,4 @@
-package messagehandler
+package message
 
 import (
 	"bytes"
@@ -8,7 +8,7 @@ import (
 	"github.com/azamaulanaaa/gotor/src/bitfield"
 )
 
-func decodeHandshake(r io.Reader) (Handshake, error) {
+func DecodeHandshake(r io.Reader) (Handshake, error) {
     var err error
 
     const minLength = 49
@@ -77,7 +77,7 @@ func decodeHandshake(r io.Reader) (Handshake, error) {
     return handshake, nil
 }
 
-func decodeMessage(r io.Reader) (interface{}, error) {
+func DecodeMessage(r io.Reader) (interface{}, error) {
     var err error
 
     var messageLen uint32
@@ -173,96 +173,96 @@ func decodeKeepAlive() (KeepAlive, error) {
     return KeepAlive{}, nil
 }
 
-func decodeChoke(data []byte) (MessageChoke, error) {
-    return MessageChoke{}, nil
+func decodeChoke(data []byte) (Choke, error) {
+    return Choke{}, nil
 }
 
-func decodeUnChoke(data []byte) (MessageUnChoke, error) {
-    return MessageUnChoke{}, nil
+func decodeUnChoke(data []byte) (UnChoke, error) {
+    return UnChoke{}, nil
 }
 
-func decodeInterested(data []byte) (MessageInterested, error) {
-    return MessageInterested{}, nil
+func decodeInterested(data []byte) (Interested, error) {
+    return Interested{}, nil
 }
 
-func decodeNotInterested(data []byte) (MessageNotInterested, error) {
-    return MessageNotInterested{}, nil
+func decodeNotInterested(data []byte) (NotInterested, error) {
+    return NotInterested{}, nil
 }
 
-func decodeHave(data []byte) (MessageHave, error) {
+func decodeHave(data []byte) (Have, error) {
     var err error
 
     const length = 1
     
     if len(data) != length {
-        return MessageHave{}, ErrorMessageInvalid
+        return Have{}, ErrorMessageInvalid
     }
 
-    var message MessageHave
+    var message Have
 
     err = bigendian.Decode(data, &message.Index)
     if err != nil {
-        return MessageHave{}, err
+        return Have{}, err
     }
 
     return message, nil
 }
 
-func decodeBitfield(data []byte) (MessageBitfield, error) {
+func decodeBitfield(data []byte) (Bitfield, error) {
     theBitfield := bitfield.BitFieldFormBytes(data)
 
-    return MessageBitfield{
+    return Bitfield{
         Bitfield: theBitfield,
     }, nil
 }
 
-func decodeRequest(data []byte) (MessageRequest, error) {
+func decodeRequest(data []byte) (Reqeust, error) {
     var err error
 
     const length = 12
 
     if len(data) != length {
-        return MessageRequest{}, ErrorMessageInvalid
+        return Reqeust{}, ErrorMessageInvalid
     }
 
-    var message MessageRequest
+    var message Reqeust
 
     err = bigendian.Decode(data[0:4], &message.Index)
     if err != nil {
-        return MessageRequest{}, err
+        return Reqeust{}, err
     }
 
     err = bigendian.Decode(data[4:8], &message.Begin)
     if err != nil {
-        return MessageRequest{}, err
+        return Reqeust{}, err
     }
 
     err = bigendian.Decode(data[8:12], &message.Length)
     if err != nil {
-        return MessageRequest{}, err
+        return Reqeust{}, err
     }
 
     return message, nil
 }
 
-func decodePiece(data []byte) (MessagePiece, error) {
+func decodePiece(data []byte) (Piece, error) {
     var err error
 
     const minLength = 8
     if len(data) < minLength {
-        return MessagePiece{}, ErrorMessageInvalid
+        return Piece{}, ErrorMessageInvalid
     }
 
-    var message MessagePiece
+    var message Piece
 
     err = bigendian.Decode(data[0:4], &message.Index)
     if err != nil {
-        return MessagePiece{}, err
+        return Piece{}, err
     }
 
     err = bigendian.Decode(data[4:8], &message.Begin)
     if err != nil {
-        return MessagePiece{}, err
+        return Piece{}, err
     }
 
     message.Piece = data[8:]
@@ -270,29 +270,29 @@ func decodePiece(data []byte) (MessagePiece, error) {
     return message, nil
 }
 
-func decodeCancel(data []byte)(MessageCancel, error) {
+func decodeCancel(data []byte)(Cancel, error) {
     var err error
 
     const length = 12
     if len(data) != length {
-        return MessageCancel{}, ErrorMessageInvalid
+        return Cancel{}, ErrorMessageInvalid
     }
 
-    var message MessageCancel
+    var message Cancel
 
     err = bigendian.Decode(data[0:4], &message.Index)
     if err != nil {
-        return MessageCancel{}, err
+        return Cancel{}, err
     }
 
     err = bigendian.Decode(data[4:8], &message.Begin)
     if err != nil {
-        return MessageCancel{}, err
+        return Cancel{}, err
     }
 
     err = bigendian.Decode(data[8:12], &message.Length)
     if err != nil {
-        return MessageCancel{}, err
+        return Cancel{}, err
     }
 
     return message, nil
