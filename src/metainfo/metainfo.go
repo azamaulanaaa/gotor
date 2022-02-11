@@ -4,53 +4,53 @@ import (
 	"bytes"
 	"io"
 
-	"github.com/azamaulanaaa/gotor/src"
 	"github.com/azamaulanaaa/gotor/src/bencode"
+    "github.com/azamaulanaaa/gotor/src/hash"
 )
 
-type metainfo bencode.Dictionary
-type info bencode.Dictionary
-type file bencode.Dictionary
+type metainfo_impl bencode.Dictionary
+type info_impl bencode.Dictionary
+type file_impl bencode.Dictionary
 
-func (self metainfo) Announce() string {
-    if rawAnnounce, ok := self["announce"].(bencode.String); ok {
+func (metainfo metainfo_impl) Announce() string {
+    if rawAnnounce, ok := metainfo["announce"].(bencode.String); ok {
         return string(rawAnnounce)
     }
 
     return ""
 }
 
-func (self metainfo) Info() src.MetainfoInfo {
-    if rawInfo, ok := self["info"].(bencode.Dictionary); ok {
-        return info(rawInfo)
+func (metainfo metainfo_impl) Info() Info {
+    if rawInfo, ok := metainfo["info"].(bencode.Dictionary); ok {
+        return info_impl(rawInfo)
     }
 
     return nil
 }
 
-func (self info) Name() (string, bool) {
-    if rawName, ok := self["name"].(bencode.String); ok {
+func (info info_impl) Name() (string, bool) {
+    if rawName, ok := info["name"].(bencode.String); ok {
         return string(rawName), true
     }
 
     return "", false
 }
 
-func (self info) PieceLength() uint64 {
-    if rawPieceLength, ok := self["piece length"].(bencode.Integer); ok {
+func (info info_impl) PieceLength() uint64 {
+    if rawPieceLength, ok := info["piece length"].(bencode.Integer); ok {
         return uint64(rawPieceLength)
     }
 
     return 0
 }
 
-func (self info) Pieces() []src.Hash {
-    if rawPieces, ok := self["pieces"].(bencode.String); ok {
-        pieces := []src.Hash{}
+func (info info_impl) Pieces() []hash.Hash {
+    if rawPieces, ok := info["pieces"].(bencode.String); ok {
+        pieces := []hash.Hash{}
 
         piecesBuffer := bytes.NewBuffer([]byte(rawPieces))
         for {
-            var buff src.Hash
+            var buff hash.Hash
             _, err := piecesBuffer.Read(buff[:])
             if err == io.EOF {
                 break
@@ -64,24 +64,24 @@ func (self info) Pieces() []src.Hash {
         return pieces
     }
 
-    return []src.Hash{}
+    return []hash.Hash{}
 }
 
-func (self info) Length() (uint64, bool) {
-    if rawLength, ok := self["length"].(bencode.Integer); ok {
+func (info info_impl) Length() (uint64, bool) {
+    if rawLength, ok := info["length"].(bencode.Integer); ok {
         return uint64(rawLength), true
     }
     
     return 0, false
 }
 
-func (self info) Files() ([]src.MetainfoFile, bool) {
-    if rawFiles, ok := self["files"].(bencode.List); ok {
-        files := make([]src.MetainfoFile, 0, len(rawFiles))
+func (info info_impl) Files() ([]File, bool) {
+    if rawFiles, ok := info["files"].(bencode.List); ok {
+        files := make([]File, 0, len(rawFiles))
 
         for _, v := range rawFiles {
             if rawFile, ok := v.(bencode.Dictionary); ok { 
-                files = append(files, file(rawFile))
+                files = append(files, file_impl(rawFile))
             }
         }
 
@@ -91,8 +91,8 @@ func (self info) Files() ([]src.MetainfoFile, bool) {
     return nil, false
 }
 
-func (self info) Private() (bool, bool) {
-    if rawPrivate, ok := self["private"].(bencode.Integer); ok {
+func (info info_impl) Private() (bool, bool) {
+    if rawPrivate, ok := info["private"].(bencode.Integer); ok {
         if rawPrivate == 1 {
             return true, true
         }else if rawPrivate == 0 {
@@ -103,16 +103,16 @@ func (self info) Private() (bool, bool) {
     return false, false
 }
 
-func (self file) Length() uint64 {
-    if rawLength, ok := self["length"].(bencode.Integer); ok {
+func (file file_impl) Length() uint64 {
+    if rawLength, ok := file["length"].(bencode.Integer); ok {
         return uint64(rawLength)
     }
 
     return 0
 }
 
-func (self file) Path() string {
-    if rawPath, ok := self["path"].(bencode.String); ok {
+func (file file_impl) Path() string {
+    if rawPath, ok := file["path"].(bencode.String); ok {
         return string(rawPath)
     }
 

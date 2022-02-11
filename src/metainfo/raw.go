@@ -3,22 +3,21 @@ package metainfo
 import (
 	"fmt"
 
-	"github.com/azamaulanaaa/gotor/src"
 	"github.com/azamaulanaaa/gotor/src/bencode"
 )
 
-func Raw(theMetainfo src.Metainfo) interface{} {
-    if ourMetainfo, ok := theMetainfo.(metainfo); ok {
+func Raw(metainfo Metainfo) interface{} {
+    if ourMetainfo, ok := metainfo.(metainfo_impl); ok {
         return bencode.Dictionary(ourMetainfo)
     }
 
     out := bencode.Dictionary{}
 
-    out["announce"] = bencode.String(theMetainfo.Announce())
+    out["announce"] = bencode.String(metainfo.Announce())
     
     info := bencode.Dictionary{}
     {
-        theInfo := theMetainfo.Info()
+        theInfo := metainfo.Info()
         info["piece length"] = bencode.Integer(theInfo.PieceLength())
 
         var pieces bencode.String
