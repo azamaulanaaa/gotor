@@ -4,6 +4,8 @@ import "github.com/azamaulanaaa/gotor/src/big_endian"
 
 func encodeMessage(rawMessage interface{}) ([]byte, error) {
     switch message := rawMessage.(type) {
+    case KeepAlive:
+        return encodeKeepAlive()
     case MessageChoke:
         return encodeChoke(message)
     case MessageUnChoke:
@@ -47,6 +49,15 @@ func encodeHandshake(handshake Handshake) ([]byte, error) {
     }
 
     return rawData, nil
+}
+
+func encodeKeepAlive() ([]byte, error) {
+    encodedLenMessage, err := bigendian.Encode(uint32(0))
+    if err != nil {
+        return nil, err
+    }
+
+    return encodedLenMessage, nil
 }
 
 func finisher(id messageID, data []byte) ([]byte, error) {

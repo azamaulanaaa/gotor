@@ -101,6 +101,10 @@ func decodeMessage(r io.Reader) (interface{}, error) {
         }
     }
 
+    if messageLen == 0 {
+        return decodeKeepAlive()
+    }
+
     {
         buff := make([]byte, messageLen)
         for {
@@ -163,6 +167,10 @@ func decodeMessage(r io.Reader) (interface{}, error) {
     }
 
     return nil, ErrorMessageInvalid
+}
+
+func decodeKeepAlive() (KeepAlive, error) {
+    return KeepAlive{}, nil
 }
 
 func decodeChoke(data []byte) (MessageChoke, error) {
