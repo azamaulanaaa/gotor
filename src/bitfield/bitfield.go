@@ -2,26 +2,24 @@ package bitfield
 
 import (
 	"errors"
-
-	"github.com/azamaulanaaa/gotor/src"
 )
 
 var (
     ErrorOutOfIndex = errors.New("index must be lower than the length")
 )
 
-type bitfield []byte
+type bitfield_impl []byte
 
-func NewBitfield(length uint32) src.Bitfield {
-    return make(bitfield, 0, length / 8)
+func NewBitfield(length uint32) Bitfield {
+    return make(bitfield_impl, 0, length / 8)
 }
 
-func BitFieldFormBytes(b []byte) src.Bitfield {
-    return bitfield(b)
+func BitFieldFormBytes(b []byte) Bitfield {
+    return bitfield_impl(b)
 }
 
-func (self bitfield) Set(index uint32, value bool) error {
-    if index >= self.Length() {
+func (bitfield bitfield_impl) Set(index uint32, value bool) error {
+    if index >= bitfield.Length() {
         return ErrorOutOfIndex
     }
 
@@ -32,30 +30,30 @@ func (self bitfield) Set(index uint32, value bool) error {
     newBit = 1 << (7 - bitIndex)
 
     if value {
-        self[sectionIndex] = self[sectionIndex] | newBit
+        bitfield[sectionIndex] = bitfield[sectionIndex] | newBit
     } else {
-        self[sectionIndex] = self[sectionIndex] &^ newBit
+        bitfield[sectionIndex] = bitfield[sectionIndex] &^ newBit
     }
 
     return nil
 }
 
-func (self bitfield) Get(index uint32) (bool, error) {
-    if index >= self.Length() {
+func (bitfield bitfield_impl) Get(index uint32) (bool, error) {
+    if index >= bitfield.Length() {
         return false, ErrorOutOfIndex
     }
 
     sectionIndex := index / 8
     bitIndex := index % 8
 
-    bit := self[sectionIndex] >> (7 - bitIndex) & 1
+    bit := bitfield[sectionIndex] >> (7 - bitIndex) & 1
     return bit == 1, nil
 }
 
-func (self bitfield) Length() uint32 {
-    return uint32(len(self) * 8)
+func (bitfield bitfield_impl) Length() uint32 {
+    return uint32(len(bitfield) * 8)
 }
 
-func (self bitfield) AsBytes() []byte {
-    return []byte(self)
+func (bitfield bitfield_impl) AsBytes() []byte {
+    return []byte(bitfield)
 }
