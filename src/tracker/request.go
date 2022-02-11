@@ -3,12 +3,13 @@ package tracker
 import (
 	"net"
 
-	"github.com/azamaulanaaa/gotor/src"
+	"github.com/azamaulanaaa/gotor/src/hash"
+	"github.com/azamaulanaaa/gotor/src/peer"
 )
 
-type Request struct {
-    infohash    src.Hash
-    peerID      src.PeerID
+type request_impl struct {
+    infohash    hash.Hash
+    peerID      peer.PeerID
     ip          interface{}
     port        interface{}
     uploaded    uint64
@@ -17,8 +18,8 @@ type Request struct {
     event       interface{}
 }
 
-func NewRequest(infohash src.Hash, peerID src.PeerID, uploaded uint64, downloaded uint64, left uint64) src.TrackerRequest {
-    return &Request{
+func NewRequest(infohash hash.Hash, peerID peer.PeerID, uploaded uint64, downloaded uint64, left uint64) Request {
+    return &request_impl{
         infohash: infohash,
         peerID: peerID,
         uploaded: uploaded,
@@ -27,18 +28,18 @@ func NewRequest(infohash src.Hash, peerID src.PeerID, uploaded uint64, downloade
     }
 }
 
-func (req *Request) InfoHash() src.Hash{
+func (req *request_impl) InfoHash() hash.Hash{
     return req.infohash
 }
 
-func (req *Request) PeerID() src.PeerID {
+func (req *request_impl) PeerID() peer.PeerID {
     return req.peerID
 }
 
-func (req *Request) SetIP(ip net.IP) {
+func (req *request_impl) SetIP(ip net.IP) {
     req.ip = ip
 }
-func (req *Request) IP() (net.IP, bool) {
+func (req *request_impl) IP() (net.IP, bool) {
     if ip, ok := req.ip.(net.IP); ok {
         return ip, true
     }
@@ -46,10 +47,10 @@ func (req *Request) IP() (net.IP, bool) {
     return nil, false
 }
 
-func (req *Request) SetPort(port uint16) {
+func (req *request_impl) SetPort(port uint16) {
     req.port = port
 }
-func (req *Request) Port() (uint16, bool) {
+func (req *request_impl) Port() (uint16, bool) {
     if port, ok := req.port.(uint16); ok {
         return port, true
     }
@@ -57,26 +58,26 @@ func (req *Request) Port() (uint16, bool) {
     return 0, false
 }
 
-func (req *Request) Uploaded() uint64 {
+func (req *request_impl) Uploaded() uint64 {
     return req.uploaded
 }
 
-func (req *Request) Downloaded() uint64 {
+func (req *request_impl) Downloaded() uint64 {
     return req.downloaded
 }
 
-func (req *Request) Left() uint64 {
+func (req *request_impl) Left() uint64 {
     return req.left
 }
 
-func (req *Request) SetEvent(event src.Event) {
+func (req *request_impl) SetEvent(event Event) {
     req.event = event
 }
-func (req *Request) Event() (src.Event, bool) {
-    if event, ok := req.event.(src.Event); ok {
+func (req *request_impl) Event() (Event, bool) {
+    if event, ok := req.event.(Event); ok {
         return event, true
     }
 
-    return src.Event(""), false
+    return Event(""), false
 }
 

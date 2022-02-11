@@ -1,25 +1,22 @@
 package tracker
 
 import (
-	"encoding/binary"
 	"errors"
 	"fmt"
-	"net"
 	"net/url"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/azamaulanaaa/gotor/src"
 	"github.com/azamaulanaaa/gotor/src/bencode"
+	"github.com/azamaulanaaa/gotor/src/peer"
 )
 
 var (
     ErrorInvalidResponse = errors.New("value is not a valid response")
-    ErrorPeerBytesInvalid = errors.New("data byte of peer should be 6 bytes")
 )
 
-func requestQuery(req src.TrackerRequest) string {
+func requestQuery(req Request) string {
     queryMap := map[string]string{}
 
     {
@@ -65,7 +62,7 @@ func requestQuery(req src.TrackerRequest) string {
     return queryStr
 }
 
-func decodeResponse(value string) (src.TrackerResponse, error) {
+func decodeResponse(value string) (Response, error) {
     var err error
 
     var rawResponse bencode.Dictionary
@@ -94,12 +91,12 @@ func decodeResponse(value string) (src.TrackerResponse, error) {
     }
 
     if rawPeers, ok := rawResponse["peers"].(bencode.String); ok {
-        peers := []src.Peer{}
+        peers := []peer.Peer{}
         rawPeersInByte := []byte(rawPeers)
 
         numPeers := len(rawPeersInByte) / 6
         for i := 0; i < numPeers; i++ {
-            peer, err := decodeBytePeer(rawPeersInByte[i:i+6])
+            peer, err := peer.NewPeerFromBytes(rawPeersInByte[i:i+6])
             if err == nil {
                 peers = append(peers, peer) 
             }
@@ -109,19 +106,4 @@ func decodeResponse(value string) (src.TrackerResponse, error) {
     }
     
     return &res, nil
-}
-
-func decodeBytePeer(value []byte) (src.Peer, error) {
-    if len(value) != 6 {
-        return nil, ErrorPeerBytesInvalid
-    }
-    ip := net.IPv4(value[0], value[1], value[2], value[3])
-    port := binary.BigEndian.Uint16(value[4:6])
-
-    peer := peer{
-        ip: ip,
-        port: port,
-    }
-
-    return &peer, nil
 }

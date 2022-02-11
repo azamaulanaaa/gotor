@@ -8,7 +8,6 @@ import (
 	"regexp"
 	"strconv"
 
-	"github.com/azamaulanaaa/gotor/src"
 )
 
 var (
@@ -24,7 +23,7 @@ type tracker_impl struct {
     httpClient  *http.Client
 }    
 
-func NewTracker(value string) (src.Tracker, error) {
+func NewTracker(value string) (Tracker, error) {
     var err error
 
     tracker := tracker_impl{
@@ -67,7 +66,7 @@ func (tracker tracker_impl) String() string {
     )
 }
 
-func (tracker tracker_impl) Do(request src.TrackerRequest) (src.TrackerResponse, error) {
+func (tracker tracker_impl) Do(request Request) (Response, error) {
     switch tracker.protocol {
     case ProtocolHTTP:
        return tracker.doHTTP(request)
@@ -80,7 +79,7 @@ func (tracker tracker_impl) Do(request src.TrackerRequest) (src.TrackerResponse,
     }
 }
 
-func (tracker tracker_impl) doHTTP(request src.TrackerRequest) (src.TrackerResponse, error) {
+func (tracker tracker_impl) doHTTP(request Request) (Response, error) {
     var err error
 
     httpReq, err := http.NewRequest(
@@ -105,11 +104,11 @@ func (tracker tracker_impl) doHTTP(request src.TrackerRequest) (src.TrackerRespo
     return decodeResponse(string(body))
 }
 
-func (tracker tracker_impl) doHTTPS(request src.TrackerRequest) (src.TrackerResponse, error) {
+func (tracker tracker_impl) doHTTPS(request Request) (Response, error) {
     return nil, ErrorProtocolNotSuppported
 }
 
-func (tracker tracker_impl) doUDP(request src.TrackerRequest) (src.TrackerResponse, error) {
+func (tracker tracker_impl) doUDP(request Request) (Response, error) {
     return nil, ErrorProtocolNotSuppported
 }
 
