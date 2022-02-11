@@ -7,10 +7,10 @@ import (
 
 type PeerID     [20]byte
 
-type Peer interface {
-    PeerID()    (PeerID, bool)
-    IP()        net.IP
-    Port()      uint16
+type Peer struct {
+    PeerID  PeerID
+    IP      net.IP
+    Port    uint16
 }
 
 var (

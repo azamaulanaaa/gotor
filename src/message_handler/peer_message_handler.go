@@ -23,7 +23,7 @@ func NewPeerMessageHandler(peer peer.Peer, amMessageHandler MessageHandler, conf
         amMessageHandler: amMessageHandler,
     }
     {
-        host := fmt.Sprintf("%s:%d", peer.IP().String(), peer.Port())
+        host := fmt.Sprintf("%s:%d", peer.IP.String(), peer.Port)
         netconn, err := net.DialTimeout("tcp", host, config.Timeout)
         if err != nil {
             return nil, err
