@@ -36,9 +36,9 @@ func (info info_impl) Name() (string, bool) {
     return "", false
 }
 
-func (info info_impl) PieceLength() uint64 {
+func (info info_impl) PieceLength() uint32 {
     if rawPieceLength, ok := info["piece length"].(bencode.Integer); ok {
-        return uint64(rawPieceLength)
+        return uint32(rawPieceLength)
     }
 
     return 0

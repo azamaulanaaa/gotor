@@ -9,7 +9,7 @@ type Metainfo interface {
     Info()          Info
 }
 type Info interface {
-    PieceLength()   uint64
+    PieceLength()   uint32
     Pieces()        []hash.Hash
     Length()        (uint64, bool)
     Files()         ([]File, bool)
