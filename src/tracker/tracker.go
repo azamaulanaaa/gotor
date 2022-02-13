@@ -68,10 +68,8 @@ func (tracker tracker_impl) String() string {
 
 func (tracker tracker_impl) Do(request Request) (Response, error) {
     switch tracker.protocol {
-    case ProtocolHTTP:
+    case ProtocolHTTP, ProtocolHTTPS:
        return tracker.doHTTP(request)
-    case ProtocolHTTPS:
-       return tracker.doHTTPS(request)
     case ProtocolUDP:
         return tracker.doUDP(request)
     default:
@@ -102,10 +100,6 @@ func (tracker tracker_impl) doHTTP(request Request) (Response, error) {
     body, _ := io.ReadAll(httpRes.Body)
 
     return decodeResponse(string(body))
-}
-
-func (tracker tracker_impl) doHTTPS(request Request) (Response, error) {
-    return nil, ErrorProtocolNotSuppported
 }
 
 func (tracker tracker_impl) doUDP(request Request) (Response, error) {
