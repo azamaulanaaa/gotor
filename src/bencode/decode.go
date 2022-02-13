@@ -62,8 +62,7 @@ func parseBencodeString(r io.Reader) (interface{}, io.Reader,  error) {
         return nil, newR, ErrorInvalid
     }
 
-    data := make([]byte, lenStr)
-    _, err = newR.Read(data)
+    data, err := io.ReadAll(io.LimitReader(newR, lenStr))
     if err != nil {
         return nil, newR, ErrorInvalid
     }
