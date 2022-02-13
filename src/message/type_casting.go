@@ -68,3 +68,6 @@ type Cancel struct {
     Begin   uint32
     Length  uint32
 }
+
+type MessageHandler func(message interface{}) error
+type HandshakeHandler func(handshake Handshake) error
