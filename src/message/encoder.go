@@ -1,8 +1,35 @@
 package message
 
-import "github.com/azamaulanaaa/gotor/src/big_endian"
+import (
+	"bytes"
+	"io"
 
-func EncodeMessage(rawMessage interface{}) ([]byte, error) {
+	"github.com/azamaulanaaa/gotor/src/big_endian"
+)
+
+func EncodeHandshake(handshake Handshake) (io.Reader, error) {
+    var err error
+
+    encodedProtocolLength, err := bigendian.Encode(uint8(len(handshake.Protocol)))
+    if err != nil {
+        return nil, err
+    }
+
+    r := &bytes.Buffer{}
+    for _, theData := range [][]byte{
+        encodedProtocolLength,
+        []byte(handshake.Protocol),
+        handshake.Reserved[:],
+        handshake.Infohash[:],
+        handshake.PeerID[:],
+    } {
+        r.Write(theData)
+    }
+
+    return r, nil
+}
+
+func EncodeMessage(rawMessage interface{}) (io.Reader, error) {
     switch message := rawMessage.(type) {
     case KeepAlive:
         return encodeKeepAlive()
@@ -18,7 +45,7 @@ func EncodeMessage(rawMessage interface{}) ([]byte, error) {
         return encodeHave(message)
     case Bitfield:
         return encodeBitfield(message)
-    case Reqeust:
+    case Request:
         return encodeRequest(message)
     case Piece:
         return encodePiece(message)
@@ -29,75 +56,53 @@ func EncodeMessage(rawMessage interface{}) ([]byte, error) {
     }
 }
 
-func EncodeHandshake(handshake Handshake) ([]byte, error) {
-    var err error
-
-    encodedProtocolLength, err := bigendian.Encode(uint8(len(handshake.Protocol)))
-    if err != nil {
-        return nil, err
-    }
-
-    rawData := []byte{}
-    for _, theData := range [][]byte{
-        encodedProtocolLength,
-        []byte(handshake.Protocol),
-        handshake.Reserved[:],
-        handshake.Infohash[:],
-        handshake.PeerID[:],
-    } {
-        rawData = append(rawData, theData...)
-    }
-
-    return rawData, nil
-}
-
-func encodeKeepAlive() ([]byte, error) {
+func encodeKeepAlive() (io.Reader, error) {
     encodedLenMessage, err := bigendian.Encode(uint32(0))
     if err != nil {
         return nil, err
     }
 
-    return encodedLenMessage, nil
+    return bytes.NewReader(encodedLenMessage), nil
 }
 
-func finisher(id messageID, data []byte) ([]byte, error) {
+func finisher(id messageID, data []byte) (io.Reader, error) {
     encodedLenMessage, err := bigendian.Encode(uint32(len(data) + 1))
     if err != nil {
         return nil, err
     }
 
-    rawData := []byte{}
+    r := &bytes.Buffer{}
     for _, theData := range [][]byte{
         encodedLenMessage,
         []byte{byte(id)},
         data,
     }{
-        rawData = append(rawData, theData...)
+        r.Write(theData)
     }
     
-    return rawData, nil
+    return r, nil
 }
 
-func encodeChoke(message Choke) ([]byte, error) {
+func encodeChoke(message Choke) (io.Reader, error) {
     return finisher(messageChoke, nil)
 }
 
-func encodeUnChoke(message UnChoke) ([]byte, error) {
+func encodeUnChoke(message UnChoke) (io.Reader, error) {
     return finisher(messageChoke, nil)
 }
 
-func encodeInterested(message Interested) ([]byte, error) {
+func encodeInterested(message Interested) (io.Reader, error) {
     return finisher(messageInterested, nil)
 }
 
-func encodeNotInterested(message NotInterested) ([]byte, error) {
+func encodeNotInterested(message NotInterested) (io.Reader, error) {
     return finisher(messageNotInterested, nil)
 }
 
-func encodeHave(message Have) ([]byte, error) {
+func encodeHave(message Have) (io.Reader, error) {
     var err error
 
-    data := make([]byte, 0, 4)
+    data := make([]byte, 4)
     data, err = bigendian.Encode(message.Index)
     if err != nil {
         return nil, err
@@ -106,13 +111,13 @@ func encodeHave(message Have) ([]byte, error) {
     return finisher(messageHave, data)
 }
 
-func encodeBitfield(message Bitfield) ([]byte, error) {
+func encodeBitfield(message Bitfield) (io.Reader, error) {
     data := message.Bitfield.AsBytes()
 
     return finisher(messageBitfield, data)
 }
 
-func encodeRequest(message Reqeust) ([]byte, error) {
+func encodeRequest(message Request) (io.Reader, error) {
     var err error
 
     if message.Length > MaxLength {
@@ -146,10 +151,18 @@ func encodeRequest(message Reqeust) ([]byte, error) {
     return finisher(messageRequest, data)
 }
 
-func encodePiece(message Piece) ([]byte, error) {
+func encodePiece(message Piece) (io.Reader, error) {
     var err error
 
-    if len(message.Piece) > int(MaxLength) {
+    var piece *bytes.Buffer
+    piece = &bytes.Buffer{}
+
+    length, err := io.Copy(piece, newReaderReadAt(message.Piece, 0))
+    if err != nil {
+        return nil, err
+    }
+
+    if int(length) > int(MaxLength) {
         return nil, ErrorMessageTooLong
     }
 
@@ -163,11 +176,11 @@ func encodePiece(message Piece) ([]byte, error) {
         return nil, err
     }
 
-    data := make([]byte, 0, 12)
+    data := make([]byte, length + 12)
     for _, theData := range [][]byte{
         encodedIndex,
         encodedBegin,
-        message.Piece,
+        piece.Bytes(),
     } {
         data = append(data, theData...)
     }
@@ -175,7 +188,7 @@ func encodePiece(message Piece) ([]byte, error) {
     return finisher(messagePiece, data)
 }
 
-func encodeCancel(message Cancel) ([]byte, error) {
+func encodeCancel(message Cancel) (io.Reader, error) {
     var err error
 
     if message.Length > MaxLength {

@@ -15,16 +15,9 @@ func DecodeHandshake(r io.Reader) (Handshake, error) {
 
     var protocolLength uint8
     {
-        buff := make([]byte, 1)
-        for {
-            _, err = r.Read(buff)
-            if err == io.EOF {
-                continue
-            }
-            if err != nil {
-                return Handshake{}, err
-            }
-            break
+        buff, err := readUntil(r, 1)
+        if err != nil {
+            return Handshake{}, err
         }
         err = bigendian.Decode(buff, &protocolLength)
         if err != nil {
@@ -32,26 +25,10 @@ func DecodeHandshake(r io.Reader) (Handshake, error) {
         }
     }
 
-    {
-        buff := make([]byte, int(protocolLength) + minLength)
-        for {
-            _, err = r.Read(buff)
-            if err == io.EOF {
-                continue
-            }
-            if err != nil {
-                return Handshake{}, err
-            }
-            break
-        }
-        r = bytes.NewReader(buff)
-    }
-
     handshake := Handshake{}
 
     {
-        buff := make([]byte, protocolLength)
-        _, err = r.Read(buff)
+        buff, err := readUntil(r, int64(protocolLength))
         if err != nil {
             return Handshake{}, err
         }
@@ -59,40 +36,35 @@ func DecodeHandshake(r io.Reader) (Handshake, error) {
         handshake.Protocol = string(buff)
     }
 
-    _, err = r.Read(handshake.Reserved[:])
-    if err != nil {
-        return Handshake{}, err
-    }
-    
-    _, err = r.Read(handshake.Infohash[:])
-    if err != nil {
-        return Handshake{}, err
-    }
+    var buff []byte
 
-    _, err = r.Read(handshake.PeerID[:])
+    buff, err = readUntil(r, int64(len(handshake.Reserved)))
     if err != nil {
         return Handshake{}, err
     }
+    copy(handshake.Reserved[:], buff)
+    
+    buff, err = readUntil(r, int64(len(handshake.Infohash)))
+    if err != nil {
+        return Handshake{}, err
+    }
+    copy(handshake.Infohash[:], buff)
+
+    buff, err = readUntil(r, int64(len(handshake.PeerID)))
+    if err != nil {
+        return Handshake{}, err
+    }
+    copy(handshake.PeerID[:], buff)
 
     return handshake, nil
 }
 
 func DecodeMessage(r io.Reader) (interface{}, error) {
-    var err error
-
     var messageLen uint32
     {
-        buff := make([]byte, 4)
-        for {
-            _, err = r.Read(buff)
-            if err == io.EOF {
-                continue
-            }
-            if err != nil {
-                return nil, err
-            }
-
-            break
+        buff, err := readUntil(r, 4)
+        if err != nil {
+            return nil, err
         }
 
         err = bigendian.Decode(buff, &messageLen)
@@ -105,27 +77,9 @@ func DecodeMessage(r io.Reader) (interface{}, error) {
         return decodeKeepAlive()
     }
 
-    {
-        buff := make([]byte, messageLen)
-        for {
-            _, err = r.Read(buff)
-            if err == io.EOF {
-                continue
-            }
-            if err != nil {
-                return nil, err
-            }
-
-            break
-        }
-
-        r = bytes.NewReader(buff)
-    }
-
     var id messageID
     {
-        buff := make([]byte, 1)
-        _, err = r.Read(buff)
+        buff, err := readUntil(r, 1)
         if err != nil {
             return nil, err
         }
@@ -139,31 +93,27 @@ func DecodeMessage(r io.Reader) (interface{}, error) {
         id = messageID(rawID)
     }
 
-    data := make([]byte, messageLen - 1)
-    _, err = r.Read(data)
-    if err != nil && err != io.EOF {
-        return nil, err
-    }
+    r = newLimitReader(r, int64(messageLen) - 1)
 
     switch id {
     case messageChoke:
-        return decodeChoke(data)
+        return decodeChoke(r)
     case messageUnChoke:
-        return decodeUnChoke(data)
+        return decodeUnChoke(r)
     case messageInterested:
-        return decodeInterested(data)
+        return decodeInterested(r)
     case messageNotInterested:
-        return decodeNotInterested(data)
+        return decodeNotInterested(r)
     case messageHave:
-        return decodeHave(data)
+        return decodeHave(r)
     case messageBitfield:
-        return decodeBitfield(data)
+        return decodeBitfield(r)
     case messageRequest:
-        return decodeRequest(data)
+        return decodeRequest(r)
     case messagePiece:
-        return decodePiece(data)
+        return decodePiece(r)
     case messageCancel:
-        return decodeCancel(data)
+        return decodeCancel(r)
     }
 
     return nil, ErrorMessageInvalid
@@ -173,29 +123,30 @@ func decodeKeepAlive() (KeepAlive, error) {
     return KeepAlive{}, nil
 }
 
-func decodeChoke(data []byte) (Choke, error) {
+func decodeChoke(r io.Reader) (Choke, error) {
     return Choke{}, nil
 }
 
-func decodeUnChoke(data []byte) (UnChoke, error) {
+func decodeUnChoke(r io.Reader) (UnChoke, error) {
     return UnChoke{}, nil
 }
 
-func decodeInterested(data []byte) (Interested, error) {
+func decodeInterested(r io.Reader) (Interested, error) {
     return Interested{}, nil
 }
 
-func decodeNotInterested(data []byte) (NotInterested, error) {
+func decodeNotInterested(r io.Reader) (NotInterested, error) {
     return NotInterested{}, nil
 }
 
-func decodeHave(data []byte) (Have, error) {
+func decodeHave(r io.Reader) (Have, error) {
     var err error
 
     const length = 1
-    
-    if len(data) != length {
-        return Have{}, ErrorMessageInvalid
+   
+    data, err := readUntil(r, length)
+    if err != nil {
+        return Have{}, err
     }
 
     var message Have
@@ -208,7 +159,12 @@ func decodeHave(data []byte) (Have, error) {
     return message, nil
 }
 
-func decodeBitfield(data []byte) (Bitfield, error) {
+func decodeBitfield(r io.Reader) (Bitfield, error) {
+    data, err := io.ReadAll(r)
+    if err != nil {
+        return Bitfield{}, err
+    }
+
     theBitfield := bitfield.BitFieldFormBytes(data)
 
     return Bitfield{
@@ -216,81 +172,107 @@ func decodeBitfield(data []byte) (Bitfield, error) {
     }, nil
 }
 
-func decodeRequest(data []byte) (Reqeust, error) {
+func decodeRequest(r io.Reader) (Request, error) {
     var err error
 
-    const length = 12
+    var message Request
+    var data []byte
 
-    if len(data) != length {
-        return Reqeust{}, ErrorMessageInvalid
+    data, err = readUntil(r, 4)
+    if err != nil {
+        return Request{}, err
+    }
+    err = bigendian.Decode(data, &message.Index)
+    if err != nil {
+        return Request{}, err
     }
 
-    var message Reqeust
-
-    err = bigendian.Decode(data[0:4], &message.Index)
+    data, err = readUntil(r, 4)
     if err != nil {
-        return Reqeust{}, err
+        return Request{}, err
+    }
+    err = bigendian.Decode(data, &message.Begin)
+    if err != nil {
+        return Request{}, err
     }
 
-    err = bigendian.Decode(data[4:8], &message.Begin)
+    data, err = readUntil(r, 4)
     if err != nil {
-        return Reqeust{}, err
+        return Request{}, err
     }
-
-    err = bigendian.Decode(data[8:12], &message.Length)
+    err = bigendian.Decode(data, &message.Length)
     if err != nil {
-        return Reqeust{}, err
+        return Request{}, err
     }
 
     return message, nil
 }
 
-func decodePiece(data []byte) (Piece, error) {
+func decodePiece(r io.Reader) (Piece, error) {
     var err error
-
-    const minLength = 8
-    if len(data) < minLength {
-        return Piece{}, ErrorMessageInvalid
-    }
 
     var message Piece
+    var data []byte
 
-    err = bigendian.Decode(data[0:4], &message.Index)
+    data, err = readUntil(r, 4)
+    if err != nil {
+        return Piece{}, err
+    }
+    err = bigendian.Decode(data, &message.Index)
     if err != nil {
         return Piece{}, err
     }
 
-    err = bigendian.Decode(data[4:8], &message.Begin)
+    data, err = readUntil(r, 4)
+    if err != nil {
+        return Piece{}, err
+    }
+    err = bigendian.Decode(data, &message.Begin)
     if err != nil {
         return Piece{}, err
     }
 
-    message.Piece = data[8:]
+    data, err = io.ReadAll(r)
+    if err != nil {
+        return Piece{}, err
+    }
+    buff := bytes.NewReader(data)
+
+    message.Piece = buff
+    
 
     return message, nil
 }
 
-func decodeCancel(data []byte)(Cancel, error) {
+func decodeCancel(r io.Reader)(Cancel, error) {
     var err error
 
-    const length = 12
-    if len(data) != length {
-        return Cancel{}, ErrorMessageInvalid
-    }
-
     var message Cancel
+    var data []byte
 
-    err = bigendian.Decode(data[0:4], &message.Index)
+    data, err = readUntil(r, 4)
+    if err != nil {
+        return Cancel{}, err
+    }
+    err = bigendian.Decode(data, &message.Index)
     if err != nil {
         return Cancel{}, err
     }
 
-    err = bigendian.Decode(data[4:8], &message.Begin)
+    data, err = readUntil(r, 4)
+    if err != nil {
+        return Cancel{}, err
+    }
+    err = bigendian.Decode(data, &message.Begin)
     if err != nil {
         return Cancel{}, err
     }
 
-    err = bigendian.Decode(data[8:12], &message.Length)
+    data, err = readUntil(r, 4)
+    if err != nil {
+        return Cancel{}, err
+    }
+    err = bigendian.Decode(data, &message.Length)
     if err != nil {
         return Cancel{}, err
     }

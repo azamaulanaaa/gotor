@@ -2,10 +2,20 @@ package message
 
 import (
 	"errors"
+	"io"
 
 	"github.com/azamaulanaaa/gotor/src/bitfield"
 	"github.com/azamaulanaaa/gotor/src/hash"
 	"github.com/azamaulanaaa/gotor/src/peer"
+)
+
+const (
+    MaxLength = uint32(16383)
+)
+
+var (
+    ErrorMessageTooLong = errors.New("maximum message length is 2^14")
+    ErrorMessageInvalid = errors.New("message is invalid")
 )
 
 type Reserved [8]byte
@@ -43,7 +53,7 @@ type Have struct {
 type Bitfield struct{
     Bitfield bitfield.Bitfield
 }
-type Reqeust struct {
+type Request struct {
     Index   uint32
     Begin   uint32
     Length  uint32
@@ -51,19 +61,10 @@ type Reqeust struct {
 type Piece struct {
     Index   uint32
     Begin   uint32
-    Piece   []byte
+    Piece   io.ReaderAt
 }
 type Cancel struct {
     Index   uint32
     Begin   uint32
     Length  uint32
 }
-
-const (
-    MaxLength = uint32(16383)
-)
-
-var (
-    ErrorMessageTooLong = errors.New("maximum message length is 2^14")
-    ErrorMessageInvalid = errors.New("message is invalid")
-)
