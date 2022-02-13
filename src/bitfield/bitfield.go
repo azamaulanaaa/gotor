@@ -11,7 +11,12 @@ var (
 type bitfield_impl []byte
 
 func NewBitfield(length uint32) Bitfield {
-    return make(bitfield_impl, 0, length / 8)
+    sectionLength := length / 8
+    if length % 8 > 0 {
+        sectionLength++
+    }
+
+    return make(bitfield_impl, sectionLength)
 }
 
 func BitFieldFormBytes(b []byte) Bitfield {
