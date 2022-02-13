@@ -1,6 +1,8 @@
 package tracker
 
 import (
+	"context"
+	"errors"
 	"net"
 	"time"
 
@@ -8,25 +10,37 @@ import (
 	"github.com/azamaulanaaa/gotor/src/peer"
 )
 
+var (
+	ErrorTrackerInvalid        = errors.New("value is not a valid tracker")
+	ErrorProtocolNotSuppported = errors.New("protocol not supported yet")
+)
+
+type Event int32
+
+const (
+	EventNone Event = iota
+	EventCompleted
+	EventStarted
+	EventStopped
+)
+
 type Tracker interface {
-    String()            string
-    Do(Request)  (Response, error)
+	Announce(ctx context.Context, req Request) (Response, error)
+	String() string
 }
 
-type Request interface {
-    InfoHash()      hash.Hash
-    PeerID()        peer.PeerID
-    IP()            (net.IP, bool)
-    Port()          (uint16, bool)
-    Uploaded()      uint64
-    Downloaded()    uint64
-    Left()          uint64
-    Event()         (Event, bool)
+type Request struct {
+	Infohash   hash.Hash
+	PeerID     peer.PeerID
+	Downloaded int64
+	Left       int64
+	Uploaded   int64
+	Event      Event
+	IP         net.IP
+	Port       uint16
 }
 
-type Response interface {
-    Interval()      time.Duration
-    Peers()         []peer.Peer
+type Response struct {
+	Interval time.Duration
+	Peers    []peer.Peer
 }
-
-type Event      string
