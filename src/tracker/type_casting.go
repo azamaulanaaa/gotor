@@ -1,7 +1,6 @@
 package tracker
 
 import (
-	"context"
 	"errors"
 	"net"
 	"time"
@@ -13,6 +12,9 @@ import (
 var (
 	ErrorTrackerInvalid        = errors.New("value is not a valid tracker")
 	ErrorProtocolNotSuppported = errors.New("protocol not supported yet")
+	ErrorUnableToConnect       = errors.New("unable connect to tracker server")
+	ErrorInvalidRequest        = errors.New("value is not a valid request")
+	ErrorInvalidResponse       = errors.New("value is not a valid response")
 )
 
 type Event int32
@@ -23,11 +25,6 @@ const (
 	EventStarted
 	EventStopped
 )
-
-type Tracker interface {
-	Announce(ctx context.Context, req Request) (Response, error)
-	String() string
-}
 
 type Request struct {
 	Infohash   hash.Hash
