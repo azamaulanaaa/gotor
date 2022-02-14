@@ -15,6 +15,7 @@ var (
 	ErrorUnableToConnect       = errors.New("unable connect to tracker server")
 	ErrorInvalidRequest        = errors.New("value is not a valid request")
 	ErrorInvalidResponse       = errors.New("value is not a valid response")
+    ErrorInvalidEvent          = errors.New("value is not a valid event")
 )
 
 type Event int32
