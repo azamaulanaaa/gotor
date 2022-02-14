@@ -6,6 +6,6 @@ pkgs.mkShell {
     ];
     shellHook = ''
         export PATH=$PATH:$(go env GOPATH)/bin
-        export GOFLAGS=-tags=integration
+        export GOFLAGS=-tags=unit,integration
     '';
 }
