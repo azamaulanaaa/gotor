@@ -54,7 +54,6 @@ const (
 
 type UDPRequestHeader struct {
 	ConnectionID  int64
-	Action        UDPAction
 	TransactionID int32
 }
 

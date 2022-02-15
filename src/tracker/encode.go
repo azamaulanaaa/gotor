@@ -68,7 +68,7 @@ func EncodeUDPRequest(rawRequest interface{}) (io.Reader, error) {
 	return nil, ErrorInvalidRequest
 }
 
-func encodeUDPRequestHeader(header UDPRequestHeader) (io.Reader, error) {
+func encodeUDPRequestHeader(header UDPRequestHeader, action udpAction) (io.Reader, error) {
 	buff := &bytes.Buffer{}
 
 	{
@@ -81,7 +81,7 @@ func encodeUDPRequestHeader(header UDPRequestHeader) (io.Reader, error) {
 	}
 
 	{
-		data, err := bigendian.Encode(header.Action)
+		data, err := bigendian.Encode(action)
 		if err != nil {
 			return nil, err
 		}
@@ -102,14 +102,14 @@ func encodeUDPRequestHeader(header UDPRequestHeader) (io.Reader, error) {
 }
 
 func encodeUDPConnectRequest(req UDPConnectRequest) (io.Reader, error) {
-	return encodeUDPRequestHeader(req.UDPRequestHeader)
+	return encodeUDPRequestHeader(req.UDPRequestHeader, udpActionConnect)
 }
 
 func encodeUDPAnnounceRequest(req UDPAnnounceRequest) (io.Reader, error) {
 	buff := &bytes.Buffer{}
 
 	{
-		header, err := encodeUDPRequestHeader(req.UDPRequestHeader)
+		header, err := encodeUDPRequestHeader(req.UDPRequestHeader, udpActionAnnounce)
 		if err != nil {
 			return nil, err
 		}
