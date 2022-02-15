@@ -3,6 +3,7 @@ package tracker
 import (
 	"errors"
 	"net"
+	"net/url"
 	"strconv"
 	"strings"
 	"time"
@@ -12,32 +13,18 @@ import (
 )
 
 func DecodeRequest(value string) (Request, error) {
-    queryMap := map[string]string{}
-
-    {
-        splitedValue := strings.Split(value, "&")
-
-        for _, v := range splitedValue {
-            pair := strings.Split(v, "=") 
-            
-            queryMap[pair[0]] = ""
-            if len(pair) > 1 {
-                queryMap[pair[0]] = pair[1]
-            }
-        }
+    urlQuery, err := url.ParseQuery(value)
+    if err != nil {
+        return Request{}, err
     }
 
     var req Request
 
-    if value, ok := queryMap["info_hash"]; ok {
-        copy(req.Infohash[:], []byte(value))
-    }
+    copy(req.Infohash[:], urlQuery.Get("info_hash"))
+    copy(req.PeerID[:], urlQuery.Get("peer_id"))
 
-    if value, ok := queryMap["peer_id"]; ok {
-        copy(req.PeerID[:], []byte(value))
-    }
-
-    if value, ok := queryMap["downloaded"]; ok {
+    if urlQuery.Has("downloaded") {
+        value := urlQuery.Get("downloaded")
         downloaded, err := strconv.ParseInt(value, 10, 64)
         if err != nil {
             return Request{}, err
@@ -46,7 +33,8 @@ func DecodeRequest(value string) (Request, error) {
         req.Downloaded = downloaded
     }
 
-    if value, ok := queryMap["left"]; ok {
+    if urlQuery.Has("left") {
+        value := urlQuery.Get("left")
         left, err := strconv.ParseInt(value, 10, 64)
         if err != nil {
             return Request{}, err
@@ -55,7 +43,8 @@ func DecodeRequest(value string) (Request, error) {
         req.Left = left
     }
 
-    if value, ok := queryMap["uploaded"]; ok {
+    if urlQuery.Has("uploaded") {
+        value := urlQuery.Get("uploaded")
         uploaded, err := strconv.ParseInt(value, 10, 64)
         if err != nil {
             return Request{}, err
@@ -64,8 +53,8 @@ func DecodeRequest(value string) (Request, error) {
         req.Uploaded = uploaded
     }
 
-    if value, ok := queryMap["event"]; ok {
-        event, err := NewEvent(value)
+    {
+        event, err := NewEvent(urlQuery.Get("event"))
         if err != nil {
             return Request{}, err
         }
@@ -73,11 +62,10 @@ func DecodeRequest(value string) (Request, error) {
         req.Event = event
     }
 
-    if value, ok := queryMap["ip"]; ok {
-        req.IP = net.ParseIP(value)
-    }
+    req.IP = net.ParseIP(urlQuery.Get("ip"))
 
-    if value, ok := queryMap["port"]; ok {
+    if urlQuery.Has("port") {
+        value = urlQuery.Get("port")
         port, err := strconv.ParseUint(value, 10, 16)
         if err != nil {
             return Request{}, err
