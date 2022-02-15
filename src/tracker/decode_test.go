@@ -4,6 +4,7 @@ package tracker_test
 
 import (
 	"net"
+	"net/url"
 	"testing"
 
 	"github.com/azamaulanaaa/gotor/src/hash"
@@ -13,8 +14,8 @@ import (
 )
 
 type requestTestData struct {
-	Request        tracker.Request
-	EncodedRequest string
+	request  tracker.Request
+	UrlQuery url.Values
 }
 
 func TestDecodeRequest(t *testing.T) {
@@ -23,6 +24,10 @@ func TestDecodeRequest(t *testing.T) {
 
 	var peerID peer.PeerID
 	copy(peerID[:], "otherhashshouldworks")
+
+	var urlQuery url.Values
+	urlQuery, err := url.ParseQuery("info_hash=ahashshoudlworkswell&downloaded=32&ip=123.123.123.123&event=completed&port=80&left=12&uploaded=0&peer_id=otherhashshouldworks")
+	test.Ok(t, err)
 
 	testsData := requestTestData{
 		tracker.Request{
@@ -35,10 +40,10 @@ func TestDecodeRequest(t *testing.T) {
 			net.IPv4(123, 123, 123, 123),
 			80,
 		},
-		"info_hash=ahashshoudlworkswell&downloaded=32&ip=123.123.123.123&event=completed&port=80&left=12&completed=0&peer_id=otherhashshouldworks",
+		urlQuery,
 	}
 
-	out, err := tracker.DecodeRequest(testsData.EncodedRequest)
+	out, err := tracker.DecodeRequest(testsData.UrlQuery.Encode())
 	test.Ok(t, err)
-	test.Equals(t, testsData.Request, out)
+	test.Equals(t, testsData.request, out)
 }
