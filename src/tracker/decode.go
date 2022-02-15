@@ -2,20 +2,28 @@ package tracker
 
 import (
 	"errors"
+	"io"
 	"net"
 	"net/url"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/azamaulanaaa/gotor/src/bencode"
 	"github.com/azamaulanaaa/gotor/src/peer"
 )
 
-func DecodeRequest(value string) (Request, error) {
-	urlQuery, err := url.ParseQuery(value)
-	if err != nil {
-		return Request{}, err
+func DecodeHTTPRequest(r io.Reader) (Request, error) {
+	var urlQuery url.Values
+	{
+		value, err := io.ReadAll(r)
+		if err != nil {
+			return Request{}, err
+		}
+
+		urlQuery, err = url.ParseQuery(string(value))
+		if err != nil {
+			return Request{}, err
+		}
 	}
 
 	var req Request
@@ -65,7 +73,7 @@ func DecodeRequest(value string) (Request, error) {
 	req.IP = net.ParseIP(urlQuery.Get("ip"))
 
 	if urlQuery.Has("port") {
-		value = urlQuery.Get("port")
+		value := urlQuery.Get("port")
 		port, err := strconv.ParseUint(value, 10, 16)
 		if err != nil {
 			return Request{}, err
@@ -77,13 +85,11 @@ func DecodeRequest(value string) (Request, error) {
 	return req, nil
 }
 
-func DecodeResponse(value string) (Response, error) {
-	var err error
-
+func DecodeHTTPResponse(r io.Reader) (Response, error) {
 	var rawResponse bencode.Dictionary
 	{
 		var rawData interface{}
-		rawData, err = bencode.Decode(strings.NewReader(value))
+		rawData, err := bencode.Decode(r)
 		if err != nil {
 			return Response{}, err
 		}
@@ -91,15 +97,15 @@ func DecodeResponse(value string) (Response, error) {
 		var ok bool
 		rawResponse, ok = rawData.(bencode.Dictionary)
 		if !ok {
-			return Response{}, ErrorInvalidResponse
+			return Response{}, err
 		}
 	}
-
-	var res Response
 
 	if rawFailureReason, ok := rawResponse["failure reason"].(bencode.String); ok {
 		return Response{}, errors.New(string(rawFailureReason))
 	}
+
+	var res Response
 
 	if rawInterval, ok := rawResponse["interval"].(bencode.Integer); ok {
 		res.Interval = time.Duration(rawInterval) * time.Second
