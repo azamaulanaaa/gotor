@@ -43,13 +43,13 @@ type Response struct {
 	Peers    []peer.Peer
 }
 
-type UDPAction int32
+type udpAction int32
 
 const (
-	UDPActionConnect UDPAction = iota
-	UDPActionAnnounce
-	UDPActionScrape
-	UDPError
+	udpActionConnect udpAction = iota
+	udpActionAnnounce
+	udpActionScrape
+	udpActionError
 )
 
 type UDPRequestHeader struct {
