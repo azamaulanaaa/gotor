@@ -15,7 +15,7 @@ var (
 	ErrorUnableToConnect       = errors.New("unable connect to tracker server")
 	ErrorInvalidRequest        = errors.New("value is not a valid request")
 	ErrorInvalidResponse       = errors.New("value is not a valid response")
-    ErrorInvalidEvent          = errors.New("value is not a valid event")
+	ErrorInvalidEvent          = errors.New("value is not a valid event")
 )
 
 type Event int32
@@ -41,4 +41,31 @@ type Request struct {
 type Response struct {
 	Interval time.Duration
 	Peers    []peer.Peer
+}
+
+type UDPAction int32
+
+const (
+	UDPActionConnect UDPAction = iota
+	UDPActionAnnounce
+	UDPActionScrape
+	UDPError
+)
+
+type UDPRequestHeader struct {
+	ConnectionID  int64
+	Action        UDPAction
+	TransactionID int32
+}
+
+type UDPConnectRequest struct {
+	UDPRequestHeader
+}
+
+type UDPAnnounceRequest struct {
+	UDPRequestHeader
+	Request
+	Key        uint32
+	NumWant    int32
+	Extensions uint16
 }

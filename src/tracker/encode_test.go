@@ -3,6 +3,7 @@
 package tracker_test
 
 import (
+	"io"
 	"net"
 	"net/url"
 	"testing"
@@ -38,7 +39,14 @@ func TestEncodeRequest(t *testing.T) {
 		urlQuery,
 	}
 
-	our, err := tracker.EncodeRequest(testsData.request)
-	test.Ok(t, err)
-	test.Equals(t, testsData.UrlQuery.Encode(), our)
+	var out string
+	{
+		rawOut, err := tracker.EncodeRequest(testsData.request)
+		test.Ok(t, err)
+		outBytes, err := io.ReadAll(rawOut)
+		test.Ok(t, err)
+		out = string(outBytes)
+	}
+
+	test.Equals(t, testsData.UrlQuery.Encode(), out)
 }
