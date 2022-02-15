@@ -111,7 +111,7 @@ func DecodeResponse(value string) (Response, error) {
 
 		numPeers := len(rawPeersInByte) / 6
 		for i := 0; i < numPeers; i++ {
-			peer, err := peer.NewPeerFromBytes(rawPeersInByte[i : i+6])
+			peer, err := peer.Decode(rawPeersInByte[i : i+6])
 			if err == nil {
 				peers = append(peers, peer)
 			}
