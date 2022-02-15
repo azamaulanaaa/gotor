@@ -41,7 +41,7 @@ func TestEncodeRequest(t *testing.T) {
 
 	var out string
 	{
-		rawOut, err := tracker.EncodeRequest(testsData.request)
+		rawOut, err := tracker.EncodeHTTPRequest(testsData.request)
 		test.Ok(t, err)
 		outBytes, err := io.ReadAll(rawOut)
 		test.Ok(t, err)

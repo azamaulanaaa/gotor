@@ -13,29 +13,7 @@ import (
 	"github.com/azamaulanaaa/gotor/src/peer"
 )
 
-func EncodeRequest(rawRequest interface{}) (io.Reader, error) {
-	switch request := rawRequest.(type) {
-	case Request:
-		return encodeHTTPRequest(request)
-	case UDPConnectRequest:
-		return encodeUDPConnectRequest(request)
-	case UDPAnnounceRequest:
-		return encodeUDPAnnounceRequest(request)
-	}
-
-	return nil, ErrorInvalidRequest
-}
-
-func EncodeResponse(rawResponse interface{}, err error) (io.Reader, error) {
-	switch response := rawResponse.(type) {
-	case Response:
-		return encodeHTTPResponse(response, err)
-	}
-
-	return nil, ErrorInvalidResponse
-}
-
-func encodeHTTPRequest(req Request) (io.Reader, error) {
+func EncodeHTTPRequest(req Request) (io.Reader, error) {
 	urlQuery := url.Values{}
 
 	urlQuery.Add("info_hash", string(req.Infohash[:]))
@@ -52,7 +30,7 @@ func encodeHTTPRequest(req Request) (io.Reader, error) {
 	return r, nil
 }
 
-func encodeHTTPResponse(res Response, failure_reason error) (io.Reader, error) {
+func EncodeHTTPResponse(res Response, failure_reason error) (io.Reader, error) {
 	var rawResponse bencode.Dictionary
 	if failure_reason != nil {
 		rawResponse["failure reason"] = bencode.String(failure_reason.Error())
@@ -77,6 +55,17 @@ func encodeHTTPResponse(res Response, failure_reason error) (io.Reader, error) {
 	r := strings.NewReader(ResStr)
 
 	return r, nil
+}
+
+func EncodeUDPRequest(rawRequest interface{}) (io.Reader, error) {
+	switch request := rawRequest.(type) {
+	case UDPConnectRequest:
+		return encodeUDPConnectRequest(request)
+	case UDPAnnounceRequest:
+		return encodeUDPAnnounceRequest(request)
+	}
+
+	return nil, ErrorInvalidRequest
 }
 
 func encodeUDPRequestHeader(header UDPRequestHeader) (io.Reader, error) {
