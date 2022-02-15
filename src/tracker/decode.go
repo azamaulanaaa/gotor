@@ -61,7 +61,7 @@ func DecodeRequest(value string) (Request, error) {
             return Request{}, err
         }
 
-        req.Downloaded = uploaded
+        req.Uploaded = uploaded
     }
 
     if value, ok := queryMap["event"]; ok {
