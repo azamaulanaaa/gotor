@@ -35,10 +35,10 @@ func TestEncodeRequest(t *testing.T) {
 			net.IPv4(123, 123, 123, 123),
 			80,
 		},
-        urlQuery,
+		urlQuery,
 	}
 
-    our, err := tracker.EncodeRequest(testsData.request)
-    test.Ok(t, err)
-    test.Equals(t, testsData.UrlQuery.Encode(), our)
+	our, err := tracker.EncodeRequest(testsData.request)
+	test.Ok(t, err)
+	test.Equals(t, testsData.UrlQuery.Encode(), our)
 }

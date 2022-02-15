@@ -13,68 +13,68 @@ import (
 )
 
 func DecodeRequest(value string) (Request, error) {
-    urlQuery, err := url.ParseQuery(value)
-    if err != nil {
-        return Request{}, err
-    }
+	urlQuery, err := url.ParseQuery(value)
+	if err != nil {
+		return Request{}, err
+	}
 
-    var req Request
+	var req Request
 
-    copy(req.Infohash[:], urlQuery.Get("info_hash"))
-    copy(req.PeerID[:], urlQuery.Get("peer_id"))
+	copy(req.Infohash[:], urlQuery.Get("info_hash"))
+	copy(req.PeerID[:], urlQuery.Get("peer_id"))
 
-    if urlQuery.Has("downloaded") {
-        value := urlQuery.Get("downloaded")
-        downloaded, err := strconv.ParseInt(value, 10, 64)
-        if err != nil {
-            return Request{}, err
-        }
+	if urlQuery.Has("downloaded") {
+		value := urlQuery.Get("downloaded")
+		downloaded, err := strconv.ParseInt(value, 10, 64)
+		if err != nil {
+			return Request{}, err
+		}
 
-        req.Downloaded = downloaded
-    }
+		req.Downloaded = downloaded
+	}
 
-    if urlQuery.Has("left") {
-        value := urlQuery.Get("left")
-        left, err := strconv.ParseInt(value, 10, 64)
-        if err != nil {
-            return Request{}, err
-        }
+	if urlQuery.Has("left") {
+		value := urlQuery.Get("left")
+		left, err := strconv.ParseInt(value, 10, 64)
+		if err != nil {
+			return Request{}, err
+		}
 
-        req.Left = left
-    }
+		req.Left = left
+	}
 
-    if urlQuery.Has("uploaded") {
-        value := urlQuery.Get("uploaded")
-        uploaded, err := strconv.ParseInt(value, 10, 64)
-        if err != nil {
-            return Request{}, err
-        }
+	if urlQuery.Has("uploaded") {
+		value := urlQuery.Get("uploaded")
+		uploaded, err := strconv.ParseInt(value, 10, 64)
+		if err != nil {
+			return Request{}, err
+		}
 
-        req.Uploaded = uploaded
-    }
+		req.Uploaded = uploaded
+	}
 
-    {
-        event, err := NewEvent(urlQuery.Get("event"))
-        if err != nil {
-            return Request{}, err
-        }
-        
-        req.Event = event
-    }
+	{
+		event, err := NewEvent(urlQuery.Get("event"))
+		if err != nil {
+			return Request{}, err
+		}
 
-    req.IP = net.ParseIP(urlQuery.Get("ip"))
+		req.Event = event
+	}
 
-    if urlQuery.Has("port") {
-        value = urlQuery.Get("port")
-        port, err := strconv.ParseUint(value, 10, 16)
-        if err != nil {
-            return Request{}, err
-        }
+	req.IP = net.ParseIP(urlQuery.Get("ip"))
 
-        req.Port = uint16(port)
-    }
+	if urlQuery.Has("port") {
+		value = urlQuery.Get("port")
+		port, err := strconv.ParseUint(value, 10, 16)
+		if err != nil {
+			return Request{}, err
+		}
 
-    return req, nil
+		req.Port = uint16(port)
+	}
+
+	return req, nil
 }
 
 func DecodeResponse(value string) (Response, error) {
