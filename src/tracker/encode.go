@@ -74,6 +74,8 @@ func EncodeUDPResponse(rawResponse interface{}) (io.Reader, error) {
 		return encodeUDPConnectResponse(response)
 	case UDPAnnounceResponse:
 		return encodeUDPAnnounceResponse(response)
+	case UDPErrorsResponse:
+		return encodeUDPErrorResponse(response)
 	}
 
 	return nil, ErrorInvalidResponse
@@ -320,6 +322,23 @@ func encodeUDPAnnounceResponse(res UDPAnnounceResponse) (io.Reader, error) {
 
 		buff.Write(data)
 	}
+
+	return buff, nil
+}
+
+func encodeUDPErrorResponse(res UDPErrorsResponse) (io.Reader, error) {
+	buff := &bytes.Buffer{}
+
+	{
+		data, err := encodeUDPResponseHeader(res.UDPResponseHeader, udpActionError)
+		if err != nil {
+			return nil, err
+		}
+
+		io.Copy(buff, data)
+	}
+
+	buff.Write([]byte(res.Message))
 
 	return buff, nil
 }

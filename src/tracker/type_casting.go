@@ -84,3 +84,8 @@ type UDPAnnounceResponse struct {
 	Leechers int32
 	Seeders  int32
 }
+
+type UDPErrorsResponse struct {
+	UDPResponseHeader
+	Message string
+}
