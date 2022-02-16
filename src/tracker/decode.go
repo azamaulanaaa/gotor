@@ -9,6 +9,8 @@ import (
 	"time"
 
 	"github.com/azamaulanaaa/gotor/src/bencode"
+	bigendian "github.com/azamaulanaaa/gotor/src/big_endian"
+	"github.com/azamaulanaaa/gotor/src/hash"
 	"github.com/azamaulanaaa/gotor/src/peer"
 )
 
@@ -127,4 +129,201 @@ func DecodeHTTPResponse(r io.Reader) (Response, error) {
 	}
 
 	return res, nil
+}
+
+func DecodeUDPRequest(r io.Reader) (interface{}, error) {
+	header, action, err := decodeUDPRequestHeader(r)
+	if err != nil {
+		return nil, err
+	}
+
+	switch action {
+	case udpActionConnect:
+		return decodeUDPConnectRequest(r, header)
+	case udpActionAnnounce:
+		return decodeUDPAnnounceRequest(r, header)
+	}
+
+	return nil, ErrorInvalidRequest
+}
+
+func decodeUDPRequestHeader(r io.Reader) (UDPRequestHeader, udpAction, error) {
+	header := UDPRequestHeader{}
+
+	{
+		buff := make([]byte, 8)
+		_, err := r.Read(buff)
+		if err != nil {
+			return UDPRequestHeader{}, 0, err
+		}
+
+		err = bigendian.Decode(buff, &header.ConnectionID)
+		if err != nil {
+			return UDPRequestHeader{}, 0, err
+		}
+	}
+
+	var action udpAction
+
+	{
+		buff := make([]byte, 4)
+		_, err := r.Read(buff)
+		if err != nil {
+			return UDPRequestHeader{}, 0, err
+		}
+
+		err = bigendian.Decode(buff, &action)
+		if err != nil {
+			return UDPRequestHeader{}, 0, err
+		}
+	}
+
+	{
+		buff := make([]byte, 4)
+		_, err := r.Read(buff)
+		if err != nil {
+			return UDPRequestHeader{}, 0, err
+		}
+
+		err = bigendian.Decode(buff, &header.TransactionID)
+		if err != nil {
+			return UDPRequestHeader{}, 0, err
+		}
+	}
+
+	return header, action, nil
+}
+
+func decodeUDPConnectRequest(r io.Reader, header UDPRequestHeader) (UDPConnectRequest, error) {
+	req := UDPConnectRequest{
+		header,
+	}
+
+	return req, nil
+}
+
+func decodeUDPAnnounceRequest(r io.Reader, header UDPRequestHeader) (UDPAnnounceRequest, error) {
+	req := UDPAnnounceRequest{
+		UDPRequestHeader: header,
+	}
+
+	{
+		var infohash hash.Hash
+		_, err := r.Read(infohash[:])
+		if err != nil {
+			return UDPAnnounceRequest{}, err
+		}
+
+		req.Infohash = infohash
+	}
+
+	{
+		var peerID peer.PeerID
+		_, err := r.Read(peerID[:])
+		if err != nil {
+			return UDPAnnounceRequest{}, err
+		}
+
+		req.PeerID = peerID
+	}
+
+	{
+		buff := make([]byte, 8)
+		_, err := r.Read(buff)
+		if err != nil {
+			return UDPAnnounceRequest{}, err
+		}
+
+		err = bigendian.Decode(buff, &req.Downloaded)
+		if err != nil {
+			return UDPAnnounceRequest{}, err
+		}
+	}
+
+	{
+		buff := make([]byte, 8)
+		_, err := r.Read(buff)
+		if err != nil {
+			return UDPAnnounceRequest{}, err
+		}
+
+		err = bigendian.Decode(buff, &req.Left)
+		if err != nil {
+			return UDPAnnounceRequest{}, err
+		}
+	}
+
+	{
+		buff := make([]byte, 8)
+		_, err := r.Read(buff)
+		if err != nil {
+			return UDPAnnounceRequest{}, err
+		}
+
+		err = bigendian.Decode(buff, &req.Uploaded)
+		if err != nil {
+			return UDPAnnounceRequest{}, err
+		}
+	}
+
+	{
+		buff := make([]byte, 4)
+		_, err := r.Read(buff)
+		if err != nil {
+			return UDPAnnounceRequest{}, err
+		}
+
+		err = bigendian.Decode(buff, &req.Event)
+		if err != nil {
+			return UDPAnnounceRequest{}, err
+		}
+	}
+
+	{
+		_, err := r.Read(req.IP)
+		if err != nil {
+			return UDPAnnounceRequest{}, err
+		}
+	}
+
+	{
+		buff := make([]byte, 4)
+		_, err := r.Read(buff)
+		if err != nil {
+			return UDPAnnounceRequest{}, err
+		}
+
+		err = bigendian.Decode(buff, &req.Key)
+		if err != nil {
+			return UDPAnnounceRequest{}, err
+		}
+	}
+
+	{
+		buff := make([]byte, 4)
+		_, err := r.Read(buff)
+		if err != nil {
+			return UDPAnnounceRequest{}, err
+		}
+
+		err = bigendian.Decode(buff, &req.NumWant)
+		if err != nil {
+			return UDPAnnounceRequest{}, err
+		}
+	}
+
+	{
+		buff := make([]byte, 2)
+		_, err := r.Read(buff)
+		if err != nil {
+			return UDPAnnounceRequest{}, err
+		}
+
+		err = bigendian.Decode(buff, &req.Port)
+		if err != nil {
+			return UDPAnnounceRequest{}, err
+		}
+	}
+
+	return req, nil
 }
