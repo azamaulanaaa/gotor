@@ -5,6 +5,7 @@ package tracker_test
 import (
 	"net"
 	"net/url"
+	"strings"
 	"testing"
 
 	"github.com/azamaulanaaa/gotor/src/hash"
@@ -43,7 +44,7 @@ func TestDecodeRequest(t *testing.T) {
 		urlQuery,
 	}
 
-	out, err := tracker.DecodeRequest(testsData.UrlQuery.Encode())
+	out, err := tracker.DecodeHTTPRequest(strings.NewReader(testsData.UrlQuery.Encode()))
 	test.Ok(t, err)
 	test.Equals(t, testsData.request, out)
 }
