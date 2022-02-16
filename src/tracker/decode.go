@@ -147,6 +147,24 @@ func DecodeUDPRequest(r io.Reader) (interface{}, error) {
 	return nil, ErrorInvalidRequest
 }
 
+func DecodeUDPResponse(r io.Reader) (interface{}, error) {
+	header, action, err := decodeUDPResponseHeader(r)
+	if err != nil {
+		return nil, ErrorInvalidEvent
+	}
+
+	switch action {
+	case udpActionConnect:
+		return decodeUDPConnectResponse(r, header)
+	case udpActionAnnounce:
+		return decodeUDPAnnounceResponse(r, header)
+	case udpActionErrors:
+		return decodeUDPErrorsResponse(r, header)
+	}
+
+	return nil, ErrorInvalidResponse
+}
+
 func decodeUDPRequestHeader(r io.Reader) (UDPRequestHeader, udpAction, error) {
 	header := UDPRequestHeader{}
 
@@ -326,4 +344,146 @@ func decodeUDPAnnounceRequest(r io.Reader, header UDPRequestHeader) (UDPAnnounce
 	}
 
 	return req, nil
+}
+
+func decodeUDPResponseHeader(r io.Reader) (UDPResponseHeader, udpAction, error) {
+	header := UDPResponseHeader{}
+
+	var action udpAction
+	{
+		data := make([]byte, 4)
+		_, err := r.Read(data)
+		if err != nil {
+			return UDPResponseHeader{}, 0, err
+		}
+
+		err = bigendian.Decode(data, &action)
+		if err != nil {
+			return UDPResponseHeader{}, 0, err
+		}
+	}
+
+	{
+		data := make([]byte, 4)
+		_, err := r.Read(data)
+		if err != nil {
+			return UDPResponseHeader{}, 0, err
+		}
+
+		err = bigendian.Decode(data, &header.TransactionID)
+		if err != nil {
+			return UDPResponseHeader{}, 0, err
+		}
+	}
+
+	return header, action, nil
+}
+
+func decodeUDPConnectResponse(r io.Reader, header UDPResponseHeader) (UDPConnectResponse, error) {
+	res := UDPConnectResponse{
+		UDPResponseHeader: header,
+	}
+
+	{
+		data := make([]byte, 8)
+		_, err := r.Read(data)
+		if err != nil {
+			return UDPConnectResponse{}, err
+		}
+
+		err = bigendian.Decode(data, &res.ConnectionID)
+		if err != nil {
+			return UDPConnectResponse{}, err
+		}
+	}
+
+	return res, nil
+}
+
+func decodeUDPAnnounceResponse(r io.Reader, header UDPResponseHeader) (UDPAnnounceResponse, error) {
+	res := UDPAnnounceResponse{
+		UDPResponseHeader: header,
+	}
+
+	{
+		data := make([]byte, 4)
+		_, err := r.Read(data)
+		if err != nil {
+			return UDPAnnounceResponse{}, err
+		}
+
+		err = bigendian.Decode(data, &res.Interval)
+		if err != nil {
+			return UDPAnnounceResponse{}, err
+		}
+	}
+
+	{
+		data := make([]byte, 4)
+		_, err := r.Read(data)
+		if err != nil {
+			return UDPAnnounceResponse{}, err
+		}
+
+		err = bigendian.Decode(data, &res.Leechers)
+		if err != nil {
+			return UDPAnnounceResponse{}, err
+		}
+	}
+
+	{
+		data := make([]byte, 4)
+		_, err := r.Read(data)
+		if err != nil {
+			return UDPAnnounceResponse{}, err
+		}
+
+		err = bigendian.Decode(data, &res.Seeders)
+		if err != nil {
+			return UDPAnnounceResponse{}, err
+		}
+	}
+
+	{
+		data, err := io.ReadAll(r)
+		if err != nil {
+			return UDPAnnounceResponse{}, err
+		}
+
+		numPeers := int(res.Leechers + res.Seeders)
+		ipLen := len(data) / numPeers
+		if ipLen != 6 && ipLen != 18 {
+			return UDPAnnounceResponse{}, ErrorInvalidResponse
+		}
+
+		res.Peers = []peer.Peer{}
+
+		for i := 0; i < numPeers; i++ {
+			thePeer, err := peer.Decode(data[i*ipLen : (i+1)*ipLen])
+			if err != nil {
+				return UDPAnnounceResponse{}, ErrorInvalidResponse
+			}
+
+			res.Peers = append(res.Peers, thePeer)
+		}
+	}
+
+	return res, nil
+}
+
+func decodeUDPErrorsResponse(r io.Reader, header UDPResponseHeader) (UDPErrorsResponse, error) {
+	res := UDPErrorsResponse{
+		UDPResponseHeader: header,
+	}
+
+	{
+		message, err := io.ReadAll(r)
+		if err != nil {
+			return UDPErrorsResponse{}, err
+		}
+
+		res.Message = string(message)
+	}
+
+	return res, nil
 }
