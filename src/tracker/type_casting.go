@@ -57,8 +57,17 @@ type UDPRequestHeader struct {
 	TransactionID int32
 }
 
+type UDPResposeHeader struct {
+	TransactionID int32
+}
+
 type UDPConnectRequest struct {
 	UDPRequestHeader
+}
+
+type UDPConnectResponse struct {
+	UDPResposeHeader
+	ConnectionID int64
 }
 
 type UDPAnnounceRequest struct {
@@ -67,4 +76,11 @@ type UDPAnnounceRequest struct {
 	Key        uint32
 	NumWant    int32
 	Extensions uint16
+}
+
+type UDPAnnounceResponse struct {
+	UDPResposeHeader
+	Response
+	Leechers int32
+	Seeders  int32
 }

@@ -68,6 +68,17 @@ func EncodeUDPRequest(rawRequest interface{}) (io.Reader, error) {
 	return nil, ErrorInvalidRequest
 }
 
+func EncodeUDPResponse(rawResponse interface{}) (io.Reader, error) {
+	switch response := rawResponse.(type) {
+	case UDPConnectResponse:
+		return encodeUDPConnectResponse(response)
+	case UDPAnnounceResponse:
+		return encodeUDPAnnounceResponse(response)
+	}
+
+	return nil, ErrorInvalidResponse
+}
+
 func encodeUDPRequestHeader(header UDPRequestHeader, action udpAction) (io.Reader, error) {
 	buff := &bytes.Buffer{}
 
@@ -204,6 +215,105 @@ func encodeUDPAnnounceRequest(req UDPAnnounceRequest) (io.Reader, error) {
 
 	{
 		data, err := bigendian.Encode(req.Extensions)
+		if err != nil {
+			return nil, err
+		}
+
+		buff.Write(data)
+	}
+
+	return buff, nil
+}
+
+func encodeUDPResponseHeader(header UDPResposeHeader, action udpAction) (io.Reader, error) {
+	buff := &bytes.Buffer{}
+
+	{
+		data, err := bigendian.Encode(action)
+		if err != nil {
+			return nil, err
+		}
+
+		buff.Write(data)
+	}
+
+	{
+		data, err := bigendian.Encode(header.TransactionID)
+		if err != nil {
+			return nil, err
+		}
+
+		buff.Write(data)
+	}
+
+	return buff, nil
+}
+
+func encodeUDPConnectResponse(res UDPConnectResponse) (io.Reader, error) {
+	buff := &bytes.Buffer{}
+
+	{
+		data, err := encodeUDPResponseHeader(res.UDPResposeHeader, udpActionConnect)
+		if err != nil {
+			return nil, err
+		}
+
+		io.Copy(buff, data)
+	}
+
+	{
+		data, err := bigendian.Encode(res.ConnectionID)
+		if err != nil {
+			return nil, err
+		}
+
+		buff.Write(data)
+	}
+
+	return buff, nil
+}
+
+func encodeUDPAnnounceResponse(res UDPAnnounceResponse) (io.Reader, error) {
+	buff := &bytes.Buffer{}
+
+	{
+		data, err := encodeUDPResponseHeader(res.UDPResposeHeader, udpActionAnnounce)
+		if err != nil {
+			return nil, err
+		}
+
+		io.Copy(buff, data)
+	}
+
+	{
+		data, err := bigendian.Encode(int32(res.Interval.Seconds()))
+		if err != nil {
+			return nil, err
+		}
+
+		buff.Write(data)
+	}
+
+	{
+		data, err := bigendian.Encode(res.Leechers)
+		if err != nil {
+			return nil, err
+		}
+
+		buff.Write(data)
+	}
+
+	{
+		data, err := bigendian.Encode(res.Seeders)
+		if err != nil {
+			return nil, err
+		}
+
+		buff.Write(data)
+	}
+
+	for _, thePeer := range res.Peers {
+		data, err := peer.Encode(thePeer)
 		if err != nil {
 			return nil, err
 		}
