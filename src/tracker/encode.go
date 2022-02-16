@@ -225,7 +225,7 @@ func encodeUDPAnnounceRequest(req UDPAnnounceRequest) (io.Reader, error) {
 	return buff, nil
 }
 
-func encodeUDPResponseHeader(header UDPResposeHeader, action udpAction) (io.Reader, error) {
+func encodeUDPResponseHeader(header UDPResponseHeader, action udpAction) (io.Reader, error) {
 	buff := &bytes.Buffer{}
 
 	{
@@ -253,7 +253,7 @@ func encodeUDPConnectResponse(res UDPConnectResponse) (io.Reader, error) {
 	buff := &bytes.Buffer{}
 
 	{
-		data, err := encodeUDPResponseHeader(res.UDPResposeHeader, udpActionConnect)
+		data, err := encodeUDPResponseHeader(res.UDPResponseHeader, udpActionConnect)
 		if err != nil {
 			return nil, err
 		}
@@ -277,7 +277,7 @@ func encodeUDPAnnounceResponse(res UDPAnnounceResponse) (io.Reader, error) {
 	buff := &bytes.Buffer{}
 
 	{
-		data, err := encodeUDPResponseHeader(res.UDPResposeHeader, udpActionAnnounce)
+		data, err := encodeUDPResponseHeader(res.UDPResponseHeader, udpActionAnnounce)
 		if err != nil {
 			return nil, err
 		}
