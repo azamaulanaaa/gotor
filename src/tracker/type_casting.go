@@ -49,7 +49,7 @@ const (
 	udpActionConnect udpAction = iota
 	udpActionAnnounce
 	udpActionScrape
-	udpActionError
+	udpActionErrors
 )
 
 type UDPRequestHeader struct {

@@ -330,7 +330,7 @@ func encodeUDPErrorResponse(res UDPErrorsResponse) (io.Reader, error) {
 	buff := &bytes.Buffer{}
 
 	{
-		data, err := encodeUDPResponseHeader(res.UDPResponseHeader, udpActionError)
+		data, err := encodeUDPResponseHeader(res.UDPResponseHeader, udpActionErrors)
 		if err != nil {
 			return nil, err
 		}
