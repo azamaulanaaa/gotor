@@ -4,6 +4,7 @@ pkgs.mkShell {
         go_1_17
         gopls
         python39Packages.grip
+        wireshark
     ];
     shellHook = ''
         export PATH=$PATH:$(go env GOPATH)/bin
