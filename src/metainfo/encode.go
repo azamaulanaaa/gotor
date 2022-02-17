@@ -5,6 +5,6 @@ import (
 )
 
 func Encode(metainfo Metainfo) (string, error) {
-    rawData := Raw(metainfo)
-    return bencode.Encode(rawData)
+	rawData := metainfo.Raw()
+	return bencode.Encode(rawData)
 }
