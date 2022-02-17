@@ -31,7 +31,8 @@ func EncodeHTTPRequest(req Request) (io.Reader, error) {
 }
 
 func EncodeHTTPResponse(res Response, failure_reason error) (io.Reader, error) {
-	var rawResponse bencode.Dictionary
+    rawResponse := bencode.Dictionary{}
+
 	if failure_reason != nil {
 		rawResponse["failure reason"] = bencode.String(failure_reason.Error())
 	} else {
