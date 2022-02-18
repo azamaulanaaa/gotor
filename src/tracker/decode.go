@@ -412,10 +412,14 @@ func decodeUDPAnnounceResponse(r io.Reader, header UDPResponseHeader) (UDPAnnoun
 			return UDPAnnounceResponse{}, err
 		}
 
-		err = bigendian.Decode(data, &res.Interval)
+		var interval32 int32
+
+		err = bigendian.Decode(data, &interval32)
 		if err != nil {
 			return UDPAnnounceResponse{}, err
 		}
+
+		res.Interval = time.Duration(interval32)
 	}
 
 	{
