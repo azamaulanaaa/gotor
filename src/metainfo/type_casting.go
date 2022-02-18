@@ -7,6 +7,7 @@ import (
 
 type Metainfo interface {
 	Announce() string
+	AnnounceList() ([][]string, bool)
 	Info() Info
 	Raw() bencode.Dictionary
 	InfoHash() (hash.Hash, error)

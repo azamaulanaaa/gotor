@@ -20,6 +20,34 @@ func (metainfo metainfo_impl) Announce() string {
 	return ""
 }
 
+func (metainfo metainfo_impl) AnnounceList() ([][]string, bool) {
+	rawAnnounceList, ok := metainfo["announce-list"].(bencode.List)
+	if !ok {
+		return [][]string{}, false
+	}
+
+	masterList := [][]string{}
+
+	for _, rawV := range rawAnnounceList {
+		v, ok := rawV.(bencode.List)
+		if !ok {
+			return [][]string{}, false
+		}
+
+		list := []string{}
+		for _, rawV = range v {
+			v, ok := rawV.(bencode.String)
+			if !ok {
+				return [][]string{}, false
+			}
+			list = append(list, string(v))
+		}
+		masterList = append(masterList, list)
+	}
+
+	return masterList, true
+}
+
 func (metainfo metainfo_impl) Info() Info {
 	if rawInfo, ok := metainfo["info"].(bencode.Dictionary); ok {
 		return info_impl(rawInfo)
