@@ -31,7 +31,7 @@ func DecodeHTTPRequest(r io.Reader) (Request, error) {
 	var req Request
 
 	copy(req.Infohash[:], urlQuery.Get("info_hash"))
-	copy(req.PeerID[:], urlQuery.Get("peer_id"))
+	copy(req.Me.PeerID[:], urlQuery.Get("peer_id"))
 
 	if urlQuery.Has("downloaded") {
 		value := urlQuery.Get("downloaded")
@@ -72,7 +72,7 @@ func DecodeHTTPRequest(r io.Reader) (Request, error) {
 		req.Event = event
 	}
 
-	req.IP = net.ParseIP(urlQuery.Get("ip"))
+	req.Me.IP = net.ParseIP(urlQuery.Get("ip"))
 
 	if urlQuery.Has("port") {
 		value := urlQuery.Get("port")
@@ -81,7 +81,7 @@ func DecodeHTTPRequest(r io.Reader) (Request, error) {
 			return Request{}, err
 		}
 
-		req.Port = uint16(port)
+		req.Me.Port = uint16(port)
 	}
 
 	return req, nil
@@ -242,7 +242,7 @@ func decodeUDPAnnounceRequest(r io.Reader, header UDPRequestHeader) (UDPAnnounce
 			return UDPAnnounceRequest{}, err
 		}
 
-		req.PeerID = peerID
+		req.Me.PeerID = peerID
 	}
 
 	{
@@ -298,7 +298,7 @@ func decodeUDPAnnounceRequest(r io.Reader, header UDPRequestHeader) (UDPAnnounce
 	}
 
 	{
-		_, err := r.Read(req.IP)
+		_, err := r.Read(req.Me.IP)
 		if err != nil {
 			return UDPAnnounceRequest{}, err
 		}
@@ -337,7 +337,7 @@ func decodeUDPAnnounceRequest(r io.Reader, header UDPRequestHeader) (UDPAnnounce
 			return UDPAnnounceRequest{}, err
 		}
 
-		err = bigendian.Decode(buff, &req.Port)
+		err = bigendian.Decode(buff, &req.Me.Port)
 		if err != nil {
 			return UDPAnnounceRequest{}, err
 		}

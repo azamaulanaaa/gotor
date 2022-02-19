@@ -28,13 +28,14 @@ func TestEncodeRequest(t *testing.T) {
 	testsData := requestTestData{
 		tracker.Request{
 			infohash,
-			peerID,
 			32,
 			12,
 			0,
 			tracker.EventCompleted,
-			net.IPv4(123, 123, 123, 123),
-			80,
+			peer.Peer{peerID,
+				net.IPv4(123, 123, 123, 123),
+				80,
+			},
 		},
 		urlQuery,
 	}

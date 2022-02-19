@@ -2,7 +2,6 @@ package tracker
 
 import (
 	"errors"
-	"net"
 	"time"
 
 	"github.com/azamaulanaaa/gotor/src/hash"
@@ -29,13 +28,11 @@ const (
 
 type Request struct {
 	Infohash   hash.Hash
-	PeerID     peer.PeerID
 	Downloaded int64
 	Left       int64
 	Uploaded   int64
 	Event      Event
-	IP         net.IP
-	Port       uint16
+	Me         peer.Peer
 }
 
 type Response struct {

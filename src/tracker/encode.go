@@ -17,13 +17,13 @@ func EncodeHTTPRequest(req Request) (io.Reader, error) {
 	urlQuery := url.Values{}
 
 	urlQuery.Add("info_hash", string(req.Infohash[:]))
-	urlQuery.Add("peer_id", string(req.PeerID[:]))
+	urlQuery.Add("peer_id", string(req.Me.PeerID[:]))
 	urlQuery.Add("downloaded", strconv.FormatInt(req.Downloaded, 10))
 	urlQuery.Add("left", strconv.FormatInt(req.Left, 10))
 	urlQuery.Add("uploaded", strconv.FormatInt(req.Uploaded, 10))
 	urlQuery.Add("event", req.Event.String())
-	urlQuery.Add("ip", req.IP.String())
-	urlQuery.Add("port", strconv.FormatUint(uint64(req.Port), 10))
+	urlQuery.Add("ip", req.Me.IP.String())
+	urlQuery.Add("port", strconv.FormatUint(uint64(req.Me.Port), 10))
 
 	r := strings.NewReader(urlQuery.Encode())
 
@@ -31,7 +31,7 @@ func EncodeHTTPRequest(req Request) (io.Reader, error) {
 }
 
 func EncodeHTTPResponse(res Response, failure_reason error) (io.Reader, error) {
-    rawResponse := bencode.Dictionary{}
+	rawResponse := bencode.Dictionary{}
 
 	if failure_reason != nil {
 		rawResponse["failure reason"] = bencode.String(failure_reason.Error())
@@ -132,7 +132,7 @@ func encodeUDPAnnounceRequest(req UDPAnnounceRequest) (io.Reader, error) {
 	}
 
 	buff.Write(req.Request.Infohash[:])
-	buff.Write(req.Request.PeerID[:])
+	buff.Write(req.Request.Me.PeerID[:])
 
 	{
 		data, err := bigendian.Encode(req.Downloaded)
@@ -172,8 +172,8 @@ func encodeUDPAnnounceRequest(req UDPAnnounceRequest) (io.Reader, error) {
 
 	{
 		thePeer := peer.Peer{
-			IP:   req.IP,
-			Port: req.Port,
+			IP:   req.Me.IP,
+			Port: req.Me.Port,
 		}
 
 		data, err := peer.Encode(thePeer)
@@ -204,8 +204,8 @@ func encodeUDPAnnounceRequest(req UDPAnnounceRequest) (io.Reader, error) {
 
 	{
 		thePeer := peer.Peer{
-			IP:   req.IP,
-			Port: req.Port,
+			IP:   req.Me.IP,
+			Port: req.Me.Port,
 		}
 
 		data, err := peer.Encode(thePeer)
