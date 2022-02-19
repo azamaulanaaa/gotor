@@ -171,12 +171,7 @@ func encodeUDPAnnounceRequest(req UDPAnnounceRequest) (io.Reader, error) {
 	}
 
 	{
-		thePeer := peer.Peer{
-			IP:   req.Me.IP,
-			Port: req.Me.Port,
-		}
-
-		data, err := peer.Encode(thePeer)
+		data, err := peer.Encode(req.Me)
 		if err != nil {
 			return nil, err
 		}
@@ -203,12 +198,7 @@ func encodeUDPAnnounceRequest(req UDPAnnounceRequest) (io.Reader, error) {
 	}
 
 	{
-		thePeer := peer.Peer{
-			IP:   req.Me.IP,
-			Port: req.Me.Port,
-		}
-
-		data, err := peer.Encode(thePeer)
+		data, err := peer.Encode(req.Me)
 		if err != nil {
 			return nil, err
 		}
