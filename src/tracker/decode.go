@@ -87,7 +87,7 @@ func DecodeHTTPRequest(r io.Reader) (Request, error) {
 	return req, nil
 }
 
-func DecodeHTTPResponse(r io.Reader) (Response, error) {
+func DecodeHTTPResponse(r io.Reader, iplen IPLen) (Response, error) {
 	var rawResponse bencode.Dictionary
 	{
 		var rawData interface{}
@@ -117,9 +117,9 @@ func DecodeHTTPResponse(r io.Reader) (Response, error) {
 		peers := []peer.Peer{}
 		rawPeersInByte := []byte(rawPeers)
 
-		numPeers := len(rawPeersInByte) / 6
+		numPeers := len(rawPeersInByte) / int(iplen)
 		for i := 0; i < numPeers; i++ {
-			peer, err := peer.Decode(rawPeersInByte[i : i+6])
+			peer, err := peer.Decode(rawPeersInByte[i : i+int(iplen)])
 			if err == nil {
 				peers = append(peers, peer)
 			}
@@ -147,7 +147,7 @@ func DecodeUDPRequest(r io.Reader) (interface{}, error) {
 	return nil, ErrorInvalidRequest
 }
 
-func DecodeUDPResponse(r io.Reader) (interface{}, error) {
+func DecodeUDPResponse(r io.Reader, iplen IPLen) (interface{}, error) {
 	header, action, err := decodeUDPResponseHeader(r)
 	if err != nil {
 		return nil, ErrorInvalidEvent
@@ -157,7 +157,7 @@ func DecodeUDPResponse(r io.Reader) (interface{}, error) {
 	case udpActionConnect:
 		return decodeUDPConnectResponse(r, header)
 	case udpActionAnnounce:
-		return decodeUDPAnnounceResponse(r, header)
+		return decodeUDPAnnounceResponse(r, header, iplen)
 	case udpActionErrors:
 		return decodeUDPErrorsResponse(r, header)
 	}
@@ -400,7 +400,7 @@ func decodeUDPConnectResponse(r io.Reader, header UDPResponseHeader) (UDPConnect
 	return res, nil
 }
 
-func decodeUDPAnnounceResponse(r io.Reader, header UDPResponseHeader) (UDPAnnounceResponse, error) {
+func decodeUDPAnnounceResponse(r io.Reader, header UDPResponseHeader, iplen IPLen) (UDPAnnounceResponse, error) {
 	res := UDPAnnounceResponse{
 		UDPResponseHeader: header,
 	}
@@ -419,7 +419,7 @@ func decodeUDPAnnounceResponse(r io.Reader, header UDPResponseHeader) (UDPAnnoun
 			return UDPAnnounceResponse{}, err
 		}
 
-		res.Interval = time.Duration(interval32)
+		res.Interval = time.Duration(interval32) * time.Second
 	}
 
 	{
@@ -449,21 +449,19 @@ func decodeUDPAnnounceResponse(r io.Reader, header UDPResponseHeader) (UDPAnnoun
 	}
 
 	{
-		data, err := io.ReadAll(r)
-		if err != nil {
-			return UDPAnnounceResponse{}, err
-		}
-
-		numPeers := int(res.Leechers + res.Seeders)
-		ipLen := len(data) / numPeers
-		if ipLen != 6 && ipLen != 18 {
-			return UDPAnnounceResponse{}, ErrorInvalidResponse
-		}
-
 		res.Peers = []peer.Peer{}
 
-		for i := 0; i < numPeers; i++ {
-			thePeer, err := peer.Decode(data[i*ipLen : (i+1)*ipLen])
+		for {
+			data := make([]byte, iplen)
+			n, err := r.Read(data)
+			if (err != nil && n == 0) || n != int(iplen) {
+				break
+			}
+			if err != nil {
+				return UDPAnnounceResponse{}, err
+			}
+
+			thePeer, err := peer.Decode(data)
 			if err != nil {
 				return UDPAnnounceResponse{}, ErrorInvalidResponse
 			}

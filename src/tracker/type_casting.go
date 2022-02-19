@@ -17,6 +17,13 @@ var (
 	ErrorInvalidEvent          = errors.New("value is not a valid event")
 )
 
+type IPLen uint8
+
+const (
+	IPv4Len IPLen = 6
+	IPv6Len IPLen = 18
+)
+
 type Event int32
 
 const (
