@@ -26,6 +26,8 @@ func Decode(b []byte) (Peer, error) {
 		if err != nil {
 			return Peer{}, err
 		}
+	default:
+		return Peer{}, ErrorPeerBytesInvalid
 	}
 
 	return peer, nil
